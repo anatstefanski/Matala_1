@@ -1,86 +1,82 @@
-<?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="8dp">
+
+    app:cardCornerRadius="22dp"
+    app:cardElevation="6dp"
+    app:cardBackgroundColor="@color/glass_card_bg"
+    app:strokeWidth="1dp"
+    app:strokeColor="@color/glass_card_stroke">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="220dp">
 
-        <!-- Image -->
+
         <ImageView
             android:id="@+id/ivCourseImage"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:scaleType="centerCrop"
+            android:alpha="0.55"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-        <!-- Dark overlay -->
+
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="#66000000"
+            android:background="@color/glass_overlay"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-        <!-- Description -->
+
         <TextView
             android:id="@+id/tvCourseDescription"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="56dp"
-            android:layout_marginBottom="40dp"
-            android:text="Short course description"
-            android:textColor="#DDFFFFFF"
+            android:layout_marginStart="18dp"
+            android:layout_marginEnd="64dp"
+            android:layout_marginBottom="36dp"
+            android:textColor="@color/glass_description_text"
             android:textSize="14sp"
             android:maxLines="2"
             android:ellipsize="end"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnPlay"
-            />
+            app:layout_constraintEnd_toStartOf="@id/btnPlay"/>
 
-        <!-- Title -->
+
         <TextView
             android:id="@+id/tvCourseTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="56dp"
-            android:layout_marginBottom="4dp"
-            android:text="Course Title"
-            android:textColor="@android:color/white"
+            android:layout_marginStart="18dp"
+            android:layout_marginEnd="64dp"
+            android:layout_marginBottom="6dp"
+            android:textColor="@color/glass_title_text"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:shadowColor="@color/shadow_black"
-            android:shadowDx="0"
-            android:shadowDy="2"
-            android:shadowRadius="4"
             app:layout_constraintBottom_toTopOf="@id/tvCourseDescription"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btnPlay"
-            />
+            app:layout_constraintEnd_toStartOf="@id/btnPlay"/>
 
-        <!-- Play Button -->
+
         <ImageButton
             android:id="@+id/btnPlay"
-            android:layout_width="42dp"
-            android:layout_height="42dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:layout_marginEnd="16dp"
             android:background="@drawable/play_circle_bg"
             android:src="@drawable/ic_play"
-            app:tint="@android:color/white"
+            app:tint="@color/glass_play_icon"
             app:layout_constraintBottom_toBottomOf="@id/tvCourseDescription"
             app:layout_constraintEnd_toEndOf="parent"/>
 

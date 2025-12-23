@@ -9,5 +9,23 @@
     <color name="transparent">#00FFFFFF</color>
 
 
+    <!-- Glass card background -->
+    <color name="glass_card_bg">#CCFFFFFF</color>
+
+    <!-- Glass border -->
+    <color name="glass_card_stroke">#22FFFFFF</color>
+
+    <!-- Image overlay (glass effect) -->
+    <color name="glass_overlay">#66FFFFFF</color>
+
+    <!-- Text colors -->
+    <color name="glass_title_text">#E6000000</color>
+    <color name="glass_description_text">#99000000</color>
+
+    <!-- Play icon -->
+    <color name="glass_play_icon">#E6000000</color>
+
+    <color name="play_teal">#99FFFFFF</color>
+
 
 </resources>

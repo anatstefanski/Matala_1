@@ -10,11 +10,17 @@ import com.google.android.material.button.MaterialButton
 class LoginActivity : AppCompatActivity() {
 
     //Local data
-    private val ID = "214009037"
-    private val Username = "anat"
+    private val ID = "123456789"
+    private val Username = "User"
     private val Password = "123456"
 
     override fun onCreate(savedInstanceState: Bundle?) {
+//        // ===== DEV MODE – לדלג על Login (למחוק לפני הגשה) =====
+//        startActivity(Intent(this, MainActivity::class.java))
+//        finish()
+//        return
+//     // =====================================================
+
         super.onCreate(savedInstanceState)
 
         // Link to login XML
