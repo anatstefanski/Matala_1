@@ -17,11 +17,6 @@ class LoginActivity : AppCompatActivity() {
     private val Password = "123456"
 
     override fun onCreate(savedInstanceState: Bundle?) {
-//        // ===== DEV MODE – לדלג על Login (למחוק לפני הגשה) =====
-//        startActivity(Intent(this, MainActivity::class.java))
-//        finish()
-//        return
-//     // =====================================================
 
         super.onCreate(savedInstanceState)
 
