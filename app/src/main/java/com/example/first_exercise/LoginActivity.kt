@@ -12,9 +12,9 @@ import com.google.android.material.button.MaterialButton
 class LoginActivity : AppCompatActivity() {
 
     //Local data
-    private val ID = "123456789"
-    private val Username = "User"
-    private val Password = "123456"
+    private val userid = "123456789"
+    private val username = "User"
+    private val password = "123456"
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -30,48 +30,48 @@ class LoginActivity : AppCompatActivity() {
             finish()
         }
 
-        val IDInput = findViewById<EditText>(R.id.id_input)
-        val UsernameInput = findViewById<EditText>(R.id.username_input)
-        val PasswordInput = findViewById<EditText>(R.id.password_input)
+        val idInput = findViewById<EditText>(R.id.id_input)
+        val usernameInput = findViewById<EditText>(R.id.username_input)
+        val passwordInput = findViewById<EditText>(R.id.password_input)
         val loginBtn = findViewById<MaterialButton>(R.id.login_btn)
 
         //Clicking the LOGIN button
         loginBtn.setOnClickListener {
 
             //Reading the text the user typed
-            val IDText = IDInput.text.toString().trim()
-            val UsernameText = UsernameInput.text.toString().trim()
-            val PasswordText = PasswordInput.text.toString().trim()
+            val idText = idInput.text.toString().trim()
+            val usernameText = usernameInput.text.toString().trim()
+            val passwordText = passwordInput.text.toString().trim()
 
             //Checks that the fields are not empty
-            if (IDText.isEmpty() || UsernameText.isEmpty() || PasswordText.isEmpty()) {
+            if (idText.isEmpty() || usernameText.isEmpty() || passwordText.isEmpty()) {
                 Toast.makeText(this, "All fields must be filled", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             //ID must be only digits
-            if (!IDText.all { it.isDigit() }) {
+            if (!idText.all { it.isDigit() }) {
                 Toast.makeText(this, "ID must contain digits only", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             //ID must be 9 digits
-            if (IDText.length != 9) {
+            if (idText.length != 9) {
                 Toast.makeText(this, "ID must contain exactly 9 digits", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
 
             //password must be at least 6 characters long.
-            if (PasswordText.length < 6) {
+            if (passwordText.length < 6) {
                 Toast.makeText(this, "Password must contain at least 6 characters", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             //Check if the details are correct
-            val isIdCorrect = IDText == ID
-            val isUsernameCorrect = UsernameText == Username
-            val isPasswordCorrect = PasswordText == Password
+            val isIdCorrect = idText == userid
+            val isUsernameCorrect = usernameText == username
+            val isPasswordCorrect = passwordText == password
 
             if (isIdCorrect && isUsernameCorrect && isPasswordCorrect) {
                 // if all the details are correct Go to the main screen
