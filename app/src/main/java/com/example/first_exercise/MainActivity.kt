@@ -1,51 +1,83 @@
 package com.example.first_exercise
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import android.view.MotionEvent
-import android.widget.EditText
-import androidx.appcompat.app.AlertDialog
-import android.content.Intent
-import android.net.Uri
-
-
-
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
+
+    //The real list of courses currently available in the app
+    private val courses = arrayListOf<CourseItem>()
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: CatalogAdapter
+    private var allCourses: List<CourseItem> = emptyList()
+    private lateinit var addItemLauncher: ActivityResultLauncher<Intent>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        val recyclerView: RecyclerView = findViewById(R.id.rvCourses)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        val adapter = CatalogAdapter(courses)
-        recyclerView.adapter = adapter
-        val allCourses = courses.toList()
 
-        //Search function
+       //Is there a saved list that will display it, if not it will display the default list
+        val saved = StorageManager.loadItems(this)
+        courses.clear()
+        courses.addAll(saved ?: defaultCourses())
+        allCourses = courses.toList()
+        recyclerView = findViewById(R.id.rvCourses)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        adapter = CatalogAdapter(courses)
+        recyclerView.adapter = adapter
+
+        //Getting a new item from the AdminActivity
+        addItemLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data = result.data
+                val newItem = data?.getSerializableExtra("new_item") as? CourseItem
+                if (newItem != null) {
+                    courses.add(newItem)
+                    allCourses = courses.toList()
+                    adapter.updateItems(allCourses)
+                    StorageManager.saveItems(this, courses) // save list in SharedPreferences
+                }
+            }
+        }
+
+        //Clicking the add button
+        val fabAdd = findViewById<FloatingActionButton>(R.id.fabAdd)
+        fabAdd.setOnClickListener {
+            val intent = Intent(this, AdminActivity::class.java)
+            addItemLauncher.launch(intent)
+        }
+
+        //Search
         fun applySearch(query: String) {
             val q = query.trim()
-
             val filtered = if (q.isEmpty()) {
                 allCourses
             } else {
                 allCourses.filter { it.title.contains(q, ignoreCase = true) }
             }
-
             adapter.updateItems(filtered)
         }
 
-        //Filter function
+        //Filter
         fun applyCategoryMultiFilter(selected: Set<String>) {
             val filtered = if (selected.isEmpty() || selected.contains("All")) {
                 allCourses
@@ -54,7 +86,6 @@ class MainActivity : AppCompatActivity() {
             }
             adapter.updateItems(filtered)
         }
-
 
         val btnFilter: TextView = findViewById(R.id.btnFilter)
 
@@ -67,22 +98,21 @@ class MainActivity : AppCompatActivity() {
         )
 
         val checked = BooleanArray(categories.size)
-        checked[0] = true  //All
+        checked[0] = true
 
         val selectedCategories = mutableSetOf("All")
 
         btnFilter.setOnClickListener {
-            val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+            val builder = AlertDialog.Builder(this)
                 .setTitle("Choose categories")
                 .setMultiChoiceItems(categories, checked) { dialogInterface, which, isChecked ->
 
-                    val dialog = dialogInterface as androidx.appcompat.app.AlertDialog
+                    val dialog = dialogInterface as AlertDialog
                     val listView = dialog.listView
 
                     checked[which] = isChecked
 
                     if (which == 0 && isChecked) {
-                        // If you select All,cancels everything else
                         selectedCategories.clear()
                         selectedCategories.add("All")
                         for (i in 1 until checked.size) {
@@ -90,18 +120,15 @@ class MainActivity : AppCompatActivity() {
                             listView.setItemChecked(i, false)
                         }
                     } else {
-                        // Select/Remove a standard category
                         if (isChecked) selectedCategories.add(categories[which])
                         else selectedCategories.remove(categories[which])
 
-                        //If you select something ALL is canceled.
                         if (selectedCategories.isNotEmpty()) {
                             selectedCategories.remove("All")
                             checked[0] = false
                             listView.setItemChecked(0, false)
                         }
 
-                        //If you deselect everything, it returns to ALL.
                         if (selectedCategories.isEmpty()) {
                             selectedCategories.add("All")
                             checked[0] = true
@@ -109,28 +136,21 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
 
-                    // Immediate update
                     applyCategoryMultiFilter(selectedCategories)
                 }
                 .setNegativeButton("OK", null)
 
-            val dialog = builder.create()
-            dialog.show()
+            builder.create().show()
         }
 
-
-
-
-        //Clicking on the search icon
+        //Search Icon Click
         val searchInput: EditText = findViewById(R.id.search_input)
         searchInput.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
 
-
                 val startDrawable = searchInput.compoundDrawables[0]
                 val endDrawable = searchInput.compoundDrawables[2]
 
-                // Click on START icon (usually left)
                 if (startDrawable != null) {
                     val iconWidth = startDrawable.bounds.width()
                     val touchAreaEnd = searchInput.paddingStart + iconWidth
@@ -140,13 +160,11 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-               // Click on END icon (usually right)
                 if (endDrawable != null) {
                     val iconWidth = endDrawable.bounds.width()
                     val touchAreaStart = searchInput.width - searchInput.paddingEnd - iconWidth
                     if (event.x >= touchAreaStart) {
                         applySearch(searchInput.text?.toString().orEmpty())
-
                         return@setOnTouchListener true
                     }
                 }
@@ -155,7 +173,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    val courses = arrayListOf(
+    //Default items
+    private fun defaultCourses(): ArrayList<CourseItem> = arrayListOf(
         // Computer Science
         CourseItem("Introduction to Computer Science", "Fundamentals of programming and algorithmic thinking", "Computer Science", R.drawable.cs1, "https://www.youtube.com/watch?v=pjb614oik9U"),
         CourseItem("Object-Oriented Programming", "OOP principles and software development", "Computer Science", R.drawable.cs2, "https://www.youtube.com/watch?v=pjb614oik9U"),
@@ -184,49 +203,52 @@ class MainActivity : AppCompatActivity() {
         CourseItem("Decision Making", "Cognitive and behavioral decision processes", "Behavioral Sciences", R.drawable.beh4, "https://www.youtube.com/watch?v=B07wJ9ZUOHA"),
         CourseItem("Cognitive Psychology", "Perception, memory, and thinking", "Behavioral Sciences", R.drawable.beh5, "https://www.youtube.com/watch?v=B07wJ9ZUOHA")
     )
+
+    //Adapter
     class CatalogAdapter(
         private var items: List<CourseItem>
     ) : RecyclerView.Adapter<CatalogAdapter.ViewHolder>() {
 
         class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             val titleTv: TextView = itemView.findViewById(R.id.tvCourseTitle)
-            val desTv:TextView=itemView.findViewById(R.id.tvCourseDescription)
+            val desTv: TextView = itemView.findViewById(R.id.tvCourseDescription)
             val imageIv: ImageView = itemView.findViewById(R.id.ivCourseImage)
-
             val playBtn: View = itemView.findViewById(R.id.btnPlay)
-
         }
 
-        // Number of items in the list
         override fun getItemCount(): Int = items.size
 
-        // Create a new ViewHolder
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_course_row, parent, false)
             return ViewHolder(view)
         }
 
-        // Connect the data to the ViewHolder
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = items[position]
             holder.titleTv.text = item.title
-            holder.imageIv.setImageResource(item.imageRes)
-            holder.desTv.text=item.description
+            holder.desTv.text = item.description
+
+            if (!item.imageUrl.isNullOrBlank()) {
+                com.squareup.picasso.Picasso.get()
+                    .load(item.imageUrl)
+                    .fit()
+                    .centerCrop()
+                    .into(holder.imageIv)
+            } else {
+                holder.imageIv.setImageResource(item.imageRes)
+            }
+
             holder.playBtn.setOnClickListener {
-                val url = item.videoUrl  // או item.videoLink / item.url לפי השם אצלך
+                val url = item.videoUrl
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 it.context.startActivity(Intent.createChooser(intent, "Open video with"))
             }
-
         }
-            // Function to update list
-            fun updateItems(newItems: List<CourseItem>) {
+
+        fun updateItems(newItems: List<CourseItem>) {
             items = newItems
             notifyDataSetChanged()
         }
     }
-
-
-
 }

@@ -20,8 +20,15 @@ class LoginActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
+
         // Link to login XML
         setContentView(R.layout.activity_login)
+
+        // ⛔ זמני לפיתוח – למחוק לפני הגשה
+        if (true) {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+        }
 
         val IDInput = findViewById<EditText>(R.id.id_input)
         val UsernameInput = findViewById<EditText>(R.id.username_input)
@@ -85,3 +92,4 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 }
+
