@@ -13,16 +13,21 @@ import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MainActivity : AppCompatActivity() {
 
-    //The real list of courses currently available in the app
+    // Displayed list defaults + admin added
     private val courses = arrayListOf<CourseItem>()
+
+    // Only admin-added items (saved in SharedPreferences)
+    private val adminAdded = arrayListOf<CourseItem>()
+
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: CatalogAdapter
     private var allCourses: List<CourseItem> = emptyList()
@@ -33,17 +38,20 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
-       //Is there a saved list that will display it, if not it will display the default list
-        val saved = StorageManager.loadItems(this)
-        courses.clear()
-        courses.addAll(saved ?: defaultCourses())
-        allCourses = courses.toList()
+        // Load ONLY admin-added items
+        adminAdded.clear()
+        adminAdded.addAll(StorageManager.loadAddedItems(this))
+
+        // Build display list = default + adminAdded
+        rebuildCoursesList()
         recyclerView = findViewById(R.id.rvCourses)
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = CatalogAdapter(courses)
         recyclerView.adapter = adapter
 
-        //Getting a new item from the AdminActivity
+        attachSwipeToDelete()
+
+        // Getting a new item from the AdminActivity
         addItemLauncher = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult()
         ) { result ->
@@ -51,22 +59,22 @@ class MainActivity : AppCompatActivity() {
                 val data = result.data
                 val newItem = data?.getSerializableExtra("new_item") as? CourseItem
                 if (newItem != null) {
-                    courses.add(newItem)
-                    allCourses = courses.toList()
+                    adminAdded.add(newItem)
+                    StorageManager.saveAddedItems(this, adminAdded)
+                    rebuildCoursesList()
                     adapter.updateItems(allCourses)
-                    StorageManager.saveItems(this, courses) // save list in SharedPreferences
                 }
             }
         }
 
-        //Clicking the add button
+        // Clicking the add button
         val fabAdd = findViewById<FloatingActionButton>(R.id.fabAdd)
         fabAdd.setOnClickListener {
             val intent = Intent(this, AdminActivity::class.java)
             addItemLauncher.launch(intent)
         }
 
-        //Search
+        // Search
         fun applySearch(query: String) {
             val q = query.trim()
             val filtered = if (q.isEmpty()) {
@@ -77,7 +85,7 @@ class MainActivity : AppCompatActivity() {
             adapter.updateItems(filtered)
         }
 
-        //Filter
+        // Filter
         fun applyCategoryMultiFilter(selected: Set<String>) {
             val filtered = if (selected.isEmpty() || selected.contains("All")) {
                 allCourses
@@ -143,7 +151,7 @@ class MainActivity : AppCompatActivity() {
             builder.create().show()
         }
 
-        //Search Icon Click
+        // Search Icon Click
         val searchInput: EditText = findViewById(R.id.search_input)
         searchInput.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
@@ -173,7 +181,73 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    //Default items
+    // Build displayed list from defaults + adminAdded
+    private fun rebuildCoursesList() {
+        courses.clear()
+        courses.addAll(defaultCourses())
+        courses.addAll(adminAdded)
+        allCourses = courses.toList()
+    }
+
+    // Swipe delete only admin items
+    private fun attachSwipeToDelete() {
+        val itemTouchHelper = ItemTouchHelper(
+            object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ) = false
+
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    val pos = viewHolder.adapterPosition
+                    if (pos == RecyclerView.NO_POSITION) return
+
+                    val item = adapter.getItemAt(pos)
+
+                    //if default item-not delete, just restore row
+                    if (isDefaultItem(item)) {
+                        adapter.notifyItemChanged(pos)
+                        return
+                    }
+
+                    //admin item-elete from adminAdded
+                    adminAdded.removeAll {
+                        it.title == item.title &&
+                                it.description == item.description &&
+                                it.category == item.category &&
+                                it.videoUrl == item.videoUrl &&
+                                (it.imageUrl ?: "") == (item.imageUrl ?: "")
+                    }
+
+                    if (adminAdded.isEmpty()) {
+                        StorageManager.clearAddedItems(this@MainActivity)
+                    } else {
+                        StorageManager.saveAddedItems(this@MainActivity, adminAdded)
+                    }
+
+                    rebuildCoursesList()
+                    adapter.updateItems(allCourses)
+                }
+            }
+        )
+
+        itemTouchHelper.attachToRecyclerView(recyclerView)
+    }
+
+    // Default item detection
+    private fun isDefaultItem(item: CourseItem): Boolean {
+        return defaultCourses().any {
+            it.title == item.title &&
+                    it.description == item.description &&
+                    it.category == item.category &&
+                    it.videoUrl == item.videoUrl &&
+                    it.imageRes == item.imageRes
+        }
+    }
+
+    // Default items
     private fun defaultCourses(): ArrayList<CourseItem> = arrayListOf(
         // Computer Science
         CourseItem("Introduction to Computer Science", "Fundamentals of programming and algorithmic thinking", "Computer Science", R.drawable.cs1, "https://www.youtube.com/watch?v=pjb614oik9U"),
@@ -204,7 +278,6 @@ class MainActivity : AppCompatActivity() {
         CourseItem("Cognitive Psychology", "Perception, memory, and thinking", "Behavioral Sciences", R.drawable.beh5, "https://www.youtube.com/watch?v=B07wJ9ZUOHA")
     )
 
-    //Adapter
     class CatalogAdapter(
         private var items: List<CourseItem>
     ) : RecyclerView.Adapter<CatalogAdapter.ViewHolder>() {
@@ -249,6 +322,9 @@ class MainActivity : AppCompatActivity() {
         fun updateItems(newItems: List<CourseItem>) {
             items = newItems
             notifyDataSetChanged()
+        }
+        fun getItemAt(position: Int): CourseItem {
+            return items[position]
         }
     }
 }
