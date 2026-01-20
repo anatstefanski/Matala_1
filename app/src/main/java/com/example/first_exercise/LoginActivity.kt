@@ -2,94 +2,88 @@ package com.example.first_exercise
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Patterns
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.first_exercise.MainActivity
 import com.example.first_exercise.R
 import com.google.android.material.button.MaterialButton
-
+import com.google.firebase.auth.FirebaseAuth
+import androidx.activity.viewModels
+import com.example.first_exercise.viewmodel.LoginState
+import com.example.first_exercise.viewmodel.LoginViewModel
 class LoginActivity : AppCompatActivity() {
-
-    //Local data
-    private val userid = "123456789"
-    private val username = "User"
-    private val password = "123456"
-
+    private val vm: LoginViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
 
-
+        // זמני לבדיקה – מתנתק כל פעם שהמסך נפתח
+        FirebaseAuth.getInstance().signOut()
         // Link to login XML
         setContentView(R.layout.activity_login)
 
-        // ⛔ זמני לפיתוח – למחוק לפני הגשה
-        if (true) {
+        // 1) If already logged in -> go directly to MainActivity
+        if (vm.isLoggedIn()) {
             startActivity(Intent(this, MainActivity::class.java))
             finish()
+            return
         }
 
-        val idInput = findViewById<EditText>(R.id.id_input)
-        val usernameInput = findViewById<EditText>(R.id.username_input)
+        // 2) Observe login result from ViewModel
+        vm.loginState.observe(this) { state ->
+            when (state) {
+                is LoginState.Loading -> {
+                    // Optional: disable button / show progress
+                }
+                is LoginState.Success -> {
+                    Toast.makeText(this, "Logged in!", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                }
+                is LoginState.Error -> {
+                    Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        // 3) Get Views (IDs match your XML: email_input, password_input)
+        val emailInput = findViewById<EditText>(R.id.email_input)
         val passwordInput = findViewById<EditText>(R.id.password_input)
         val loginBtn = findViewById<MaterialButton>(R.id.login_btn)
 
-        //Clicking the LOGIN button
+        // 4) Click handler
         loginBtn.setOnClickListener {
-
-            //Reading the text the user typed
-            val idText = idInput.text.toString().trim()
-            val usernameText = usernameInput.text.toString().trim()
+            val emailText = emailInput.text.toString().trim()
             val passwordText = passwordInput.text.toString().trim()
 
-            //Checks that the fields are not empty
-            if (idText.isEmpty() || usernameText.isEmpty() || passwordText.isEmpty()) {
-                Toast.makeText(this, "All fields must be filled", Toast.LENGTH_SHORT).show()
+            // empty
+            if (emailText.isEmpty() || passwordText.isEmpty()) {
+                Toast.makeText(this, "Email and password must be filled", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            //ID must be only digits
-            if (!idText.all { it.isDigit() }) {
-                Toast.makeText(this, "ID must contain digits only", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            //ID must be 9 digits
-            if (idText.length != 9) {
-                Toast.makeText(this, "ID must contain exactly 9 digits", Toast.LENGTH_SHORT).show()
+// email format (basic)
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(emailText).matches()) {
+                Toast.makeText(this, "Invalid email address", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
 
-            //password must be at least 6 characters long.
-            if (passwordText.length < 6) {
-                Toast.makeText(this, "Password must contain at least 6 characters", Toast.LENGTH_SHORT).show()
+// password: EXACTLY 6 digits
+            if (passwordText.length != 6 || !passwordText.all { it.isDigit() }) {
+                Toast.makeText(this, "Password must be exactly 6 digits", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            //Check if the details are correct
-            val isIdCorrect = idText == userid
-            val isUsernameCorrect = usernameText == username
-            val isPasswordCorrect = passwordText == password
 
-            if (isIdCorrect && isUsernameCorrect && isPasswordCorrect) {
-                // if all the details are correct Go to the main screen
-
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finish()
-
-            } else {
-                // If any of the details are incorrect, an error message is returned
-                Toast.makeText(
-                    this,
-                    "Incorrect ID, username or password",
-                    Toast.LENGTH_SHORT
-
-                ).show()
+            // Call ViewModel (which calls Repository -> Firebase)
+            vm.login(emailText, passwordText)
             }
+
+
         }
     }
-}
+
+
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "626464937456",
+    "project_id": "smartstudy-40621",
+    "storage_bucket": "smartstudy-40621.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:626464937456:android:164a5208aa243519e3f935",
+        "android_client_info": {
+          "package_name": "com.example.first_exercise"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVj4pjgd9KezxUj2meJ74QmBWml8OaIIQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
