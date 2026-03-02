@@ -7,8 +7,12 @@ class AuthRepository(
 ) {
     fun login(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
         auth.signInWithEmailAndPassword(email, password)
-            .addOnSuccessListener { onResult(true, null) }
-            .addOnFailureListener { e -> onResult(false, e.message) }
+            .addOnSuccessListener {
+                onResult(true, null)
+            }
+            .addOnFailureListener {
+                onResult(false, "User not found")
+            }
     }
 
     fun isLoggedIn(): Boolean = auth.currentUser != null
