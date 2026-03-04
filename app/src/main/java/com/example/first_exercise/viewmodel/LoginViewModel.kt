@@ -14,11 +14,22 @@ class LoginViewModel : ViewModel() {
 
     fun login(email: String, password: String) {
         _loginState.value = LoginState.Loading
+
         repo.login(email, password) { success, error ->
-            _loginState.postValue(
-                if (success) LoginState.Success
-                else LoginState.Error(error ?: "Login failed")
-            )
+            if (!success) {
+                _loginState.postValue(LoginState.Error(error ?: "Login failed"))
+                return@login
+            }
+
+            val uid = repo.currentUid()
+            if (uid == null) {
+                _loginState.postValue(LoginState.Error("Missing user uid"))
+                return@login
+            }
+
+            repo.fetchIsAdmin(uid) { isAdmin ->
+                _loginState.postValue(LoginState.Success(isAdmin))
+            }
         }
     }
 
@@ -29,6 +40,6 @@ class LoginViewModel : ViewModel() {
 
 sealed class LoginState {
     data object Loading : LoginState()
-    data object Success : LoginState()
+    data class Success(val isAdmin: Boolean) : LoginState()
     data class Error(val message: String) : LoginState()
 }

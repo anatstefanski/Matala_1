@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Patterns
 import android.widget.EditText
 import android.widget.Toast
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.first_exercise.MainActivity
 import com.example.first_exercise.R
@@ -14,6 +15,7 @@ import androidx.activity.viewModels
 import com.example.first_exercise.viewmodel.LoginState
 import com.example.first_exercise.viewmodel.LoginViewModel
 class LoginActivity : AppCompatActivity() {
+    private lateinit var onClickListener: () -> Unit
     private val vm: LoginViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +40,14 @@ class LoginActivity : AppCompatActivity() {
                 }
                 is LoginState.Success -> {
                     Toast.makeText(this, "Logged in!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, MainActivity::class.java))
+
+                    val next = if (state.isAdmin) {
+                        Intent(this, AdminActivity::class.java)
+                    } else {
+                        Intent(this, MainActivity::class.java)
+                    }
+
+                    startActivity(next)
                     finish()
                 }
                 is LoginState.Error -> {
@@ -81,7 +90,11 @@ class LoginActivity : AppCompatActivity() {
             vm.login(emailText, passwordText)
             }
 
+        val goToRegister = findViewById<TextView>(R.id.go_to_register)
 
+        goToRegister.setOnClickListener {
+            startActivity(Intent(this, RegisterActivity::class.java))
+        }
         }
     }
 

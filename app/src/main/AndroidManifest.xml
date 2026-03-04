@@ -17,6 +17,8 @@
             android:name=".AdminActivity"
             android:exported="false" />
         <activity
+            android:name=".RegisterActivity" />
+        <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
