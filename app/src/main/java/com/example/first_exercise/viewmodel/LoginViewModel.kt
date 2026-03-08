@@ -35,7 +35,16 @@ class LoginViewModel : ViewModel() {
 
     fun isLoggedIn(): Boolean = repo.isLoggedIn()
 
-
+    fun checkAdminForExistingUser(onResult: (Boolean) -> Unit) {
+        val uid = repo.currentUid()
+        if (uid != null) {
+            repo.fetchIsAdmin(uid) { isAdmin ->
+                onResult(isAdmin)
+            }
+        } else {
+            onResult(false)
+        }
+    }
 }
 
 sealed class LoginState {

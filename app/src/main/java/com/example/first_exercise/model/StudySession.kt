@@ -7,9 +7,9 @@ data class StudySession(
     val topic: String = "",
     val date: String = "",
     val time: String = "",
-    val locationName: String = "",
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
     val zoomLink: String? = null,
-    val participantsCount: Int = 0 // שדה לסטטיסטיקה: כמה סטודנטים נרשמו
+    val participantsCount: Int = 0 ,// שדה לסטטיסטיקה: כמה סטודנטים נרשמו
+    var isUserRegistered: Boolean = false // שדה מקומי לעדכון האדאפטר
 )

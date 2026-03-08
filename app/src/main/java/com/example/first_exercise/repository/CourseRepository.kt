@@ -1,5 +1,6 @@
 package com.example.first_exercise.repository
 
+import android.util.Log
 import com.example.first_exercise.model.CourseItem
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -17,9 +18,19 @@ class CourseRepository {
 
     // שליפת כל הקורסים הקיימים (לצורך הצגה ב-Spinner או סינון)
     fun getAllCourses(onResult: (List<CourseItem>) -> Unit) {
-        coursesCollection.get().addOnSuccessListener { snapshot ->
-            val list = snapshot.toObjects(CourseItem::class.java)
-            onResult(list)
-        }
+        coursesCollection.get()
+            .addOnSuccessListener { snapshot ->
+                val list = snapshot.toObjects(CourseItem::class.java)
+                onResult(list)
+            }
+            .addOnFailureListener {
+                onResult(emptyList())
+            }
+            .addOnSuccessListener { snapshot ->
+                Log.d("COURSES", "size = ${snapshot.size()}")
+                val list = snapshot.toObjects(CourseItem::class.java)
+                onResult(list)
+            }
     }
+
 }

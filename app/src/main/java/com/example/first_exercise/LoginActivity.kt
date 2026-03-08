@@ -27,8 +27,12 @@ class LoginActivity : AppCompatActivity() {
 
         // 1) If already logged in -> go directly to MainActivity
         if (vm.isLoggedIn()) {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+            vm.checkAdminForExistingUser { isAdmin ->
+                val intent = Intent(this, MainActivity::class.java)
+                intent.putExtra("IS_ADMIN", isAdmin)
+                startActivity(intent)
+                finish()
+            }
             return
         }
 
@@ -40,14 +44,9 @@ class LoginActivity : AppCompatActivity() {
                 }
                 is LoginState.Success -> {
                     Toast.makeText(this, "Logged in!", Toast.LENGTH_SHORT).show()
-
-                    val next = if (state.isAdmin) {
-                        Intent(this, AdminActivity::class.java)
-                    } else {
-                        Intent(this, MainActivity::class.java)
-                    }
-
-                    startActivity(next)
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.putExtra("IS_ADMIN", state.isAdmin) // מעבירים את הנתון הלאה
+                    startActivity(intent)
                     finish()
                 }
                 is LoginState.Error -> {
