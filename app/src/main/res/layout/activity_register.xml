@@ -44,6 +44,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/title_register" />
 
+    <TextView
+        android:id="@+id/username_hint_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginEnd="36dp"
+        android:layout_marginTop="4dp"
+        android:text="* 1–5 letters only"
+        android:textSize="12sp"
+        android:textColor="#666666"
+        app:layout_constraintTop_toBottomOf="@id/fullname_input"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <EditText
         android:id="@+id/email_input"
         android:layout_width="0dp"
@@ -61,7 +75,7 @@
         android:singleLine="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fullname_input" />
+        app:layout_constraintTop_toBottomOf="@id/username_hint_text" />
 
     <EditText
         android:id="@+id/password_input"
@@ -84,6 +98,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/email_input" />
 
+    <TextView
+        android:id="@+id/password_hint_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginEnd="36dp"
+        android:layout_marginTop="4dp"
+        android:text="* 6 digits"
+        android:textSize="12sp"
+        android:textColor="#666666"
+        app:layout_constraintTop_toBottomOf="@id/password_input"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <EditText
         android:id="@+id/confirm_password_input"
         android:layout_width="0dp"
@@ -103,7 +131,7 @@
         android:singleLine="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/password_input" />
+        app:layout_constraintTop_toBottomOf="@id/password_hint_text" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/register_btn"

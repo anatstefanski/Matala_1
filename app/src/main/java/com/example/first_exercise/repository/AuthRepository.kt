@@ -38,7 +38,76 @@ class AuthRepository(
                 onResult(false)
             }
     }
+    fun updateEmail(newEmail: String, onResult: (Boolean, String?) -> Unit) {
 
+        val user = auth.currentUser
+
+        user?.updateEmail(newEmail)
+            ?.addOnSuccessListener {
+                onResult(true, null)
+            }
+            ?.addOnFailureListener {
+                onResult(false, it.message)
+            }
+
+    }
+
+    fun updatePassword(newPassword: String, onResult: (Boolean, String?) -> Unit) {
+
+        val user = auth.currentUser
+
+        user?.updatePassword(newPassword)
+            ?.addOnSuccessListener {
+                onResult(true, null)
+            }
+            ?.addOnFailureListener {
+                onResult(false, it.message)
+            }
+
+    }
+
+    fun reauthenticateAndUpdateEmail(
+        currentEmail: String,
+        password: String,
+        newEmail: String,
+        onResult: (Boolean, String?) -> Unit
+    ) {
+
+        val user = auth.currentUser ?: return
+
+        val credential =
+            com.google.firebase.auth.EmailAuthProvider
+                .getCredential(currentEmail, password)
+
+        user.reauthenticate(credential)
+            .addOnSuccessListener {
+
+                user.updateEmail(newEmail)
+                    .addOnSuccessListener {
+                        onResult(true, null)
+                    }
+                    .addOnFailureListener {
+                        onResult(false, it.message)
+                    }
+
+            }
+            .addOnFailureListener {
+                onResult(false, it.message)
+            }
+    }
+    fun verifyAndUpdateEmail(newEmail: String, onResult: (Boolean, String?) -> Unit) {
+
+        val user = auth.currentUser
+
+        user?.verifyBeforeUpdateEmail(newEmail)
+            ?.addOnSuccessListener {
+                onResult(true, null)
+            }
+            ?.addOnFailureListener {
+                onResult(false, it.message)
+            }
+
+    }
     fun logout() {
         auth.signOut()
     }

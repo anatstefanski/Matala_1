@@ -16,8 +16,22 @@ class LoginViewModel : ViewModel() {
         _loginState.value = LoginState.Loading
 
         repo.login(email, password) { success, error ->
+
             if (!success) {
-                _loginState.postValue(LoginState.Error(error ?: "Login failed"))
+
+                // אם המייל או הסיסמה לא נכונים
+                if (error?.contains("password", true) == true ||
+                    error?.contains("credential", true) == true ||
+                    error?.contains("user", true) == true) {
+
+                    _loginState.postValue(LoginState.Error("Email or password is incorrect"))
+
+                } else {
+
+                    _loginState.postValue(LoginState.Error("Login failed"))
+
+                }
+
                 return@login
             }
 

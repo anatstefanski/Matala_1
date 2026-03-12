@@ -20,6 +20,7 @@ import com.example.first_exercise.model.CourseItem
 import com.example.first_exercise.viewmodel.CourseViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.squareup.picasso.Picasso
+import com.example.first_exercise.EditProfileActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -39,6 +40,15 @@ class MainActivity : AppCompatActivity() {
 
         setupUI()
         observeViewModel()
+
+        val profileBtn = findViewById<FloatingActionButton>(R.id.fabProfile)
+
+        profileBtn.setOnClickListener {
+
+            val intent = Intent(this, EditProfileActivity::class.java)
+            startActivity(intent)
+
+        }
     }
 
     private fun setupUI() {
@@ -110,6 +120,7 @@ class MainActivity : AppCompatActivity() {
             builder.show()
         }
     }
+
 
     // Adapter
     class CourseAdapter(private val onCourseClick: (CourseItem) -> Unit) :

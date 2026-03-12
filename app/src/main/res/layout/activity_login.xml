@@ -90,6 +90,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/email_input" />
 
+    <TextView
+        android:id="@+id/password_hint_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="36dp"
+        android:layout_marginEnd="36dp"
+        android:layout_marginTop="4dp"
+        android:text="* 6 digits"
+        android:textSize="12sp"
+        android:textColor="#666666"
+        app:layout_constraintTop_toBottomOf="@id/password_input"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/login_btn"
@@ -103,13 +117,13 @@
         android:paddingBottom="12dp"
         app:backgroundTint="@color/lightBlue"
         android:elevation="6dp"
-        android:text="Log In"
+        android:text="Log in"
         android:textColor="@android:color/white"
         android:textSize="18sp"
         app:cornerRadius="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/password_input" />
+        app:layout_constraintTop_toBottomOf="@id/password_hint_text" />
 
     <TextView
         android:id="@+id/go_to_register"

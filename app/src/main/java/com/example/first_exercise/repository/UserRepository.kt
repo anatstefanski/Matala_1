@@ -24,4 +24,19 @@ class UserRepository(
             }
             .addOnFailureListener { e -> onResult(Result.failure(e)) }
     }
+    fun updateUser(user: User, onResult: (Result<Unit>) -> Unit) {
+
+        usersCol.document(user.uid)
+            .set(user)
+            .addOnSuccessListener {
+
+                onResult(Result.success(Unit))
+
+            }
+            .addOnFailureListener { e ->
+
+                onResult(Result.failure(e))
+
+            }
+    }
 }
