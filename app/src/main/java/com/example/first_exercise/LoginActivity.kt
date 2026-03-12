@@ -59,6 +59,41 @@ class LoginActivity : AppCompatActivity() {
         val emailInput = findViewById<EditText>(R.id.email_input)
         val passwordInput = findViewById<EditText>(R.id.password_input)
         val loginBtn = findViewById<MaterialButton>(R.id.login_btn)
+        val forgotPasswordText = findViewById<TextView>(R.id.forgot_password_text)
+
+        forgotPasswordText.setOnClickListener {
+
+            val email = emailInput.text.toString().trim()
+
+            // בדיקה אם ריק
+            if (email.isEmpty()) {
+                Toast.makeText(this, "Enter your email first", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // בדיקה אם המייל תקין
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                Toast.makeText(this, "Invalid email address", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // שליחת מייל לשינוי סיסמה
+            FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                .addOnSuccessListener {
+                    Toast.makeText(
+                        this,
+                        "Password reset email sent",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(
+                        this,
+                        "Failed to send reset email",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+        }
 
         // 4) Click handler
         loginBtn.setOnClickListener {
@@ -95,6 +130,8 @@ class LoginActivity : AppCompatActivity() {
             startActivity(Intent(this, RegisterActivity::class.java))
         }
         }
+
+
     }
 
 

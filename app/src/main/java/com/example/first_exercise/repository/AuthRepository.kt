@@ -108,6 +108,17 @@ class AuthRepository(
             }
 
     }
+
+    fun resetPassword(email: String, onResult: (Boolean, String?) -> Unit) {
+
+        auth.sendPasswordResetEmail(email)
+            .addOnSuccessListener {
+                onResult(true, null)
+            }
+            .addOnFailureListener {
+                onResult(false, it.message)
+            }
+    }
     fun logout() {
         auth.signOut()
     }

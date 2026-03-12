@@ -3,4 +3,10 @@
     <string name="title_activity_catalog">CatalogActivity</string>
 
     <string name="logout"><u>Log Out</u></string>
+
+    <string name="register"> Dont have an account?<u> Register</u></string>
+
+    <string name="forgot_password_text"><u>Forgot password?</u></string>
+
+
 </resources>
