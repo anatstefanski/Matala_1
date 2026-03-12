@@ -1,6 +1,5 @@
 package com.example.first_exercise
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -13,6 +12,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -27,13 +27,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: CourseAdapter
     private lateinit var progressBar: ProgressBar
     private var isAdmin: Boolean = false
-    private var allCourses: List<CourseItem> = emptyList()
 
     private lateinit var searchInput: EditText
     private lateinit var btnFilter: TextView
-
-    private var currentSearchQuery: String = ""
-    private var currentSelectedCategories: Set<String> = setOf("All")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,7 +39,6 @@ class MainActivity : AppCompatActivity() {
 
         setupUI()
         observeViewModel()
-        viewModel.loadCourses()
     }
 
     private fun setupUI() {
@@ -55,115 +50,101 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = CourseAdapter { course ->
-            val intent = Intent(this, SessionsActivity::class.java)
-            intent.putExtra("COURSE_ID", course.courseId)
-            intent.putExtra("COURSE_NAME", course.title)
-            intent.putExtra("IS_ADMIN", isAdmin)
+            val intent = Intent(this, SessionsActivity::class.java).apply {
+                putExtra("COURSE_ID", course.courseId)
+                putExtra("COURSE_NAME", course.title)
+                putExtra("IS_ADMIN", isAdmin)
+            }
             startActivity(intent)
         }
         recyclerView.adapter = adapter
 
         fabAddCourse.visibility = if (isAdmin) View.VISIBLE else View.GONE
-        fabAddCourse.setOnClickListener { startActivity(Intent(this, AdminActivity::class.java)) }
+        fabAddCourse.setOnClickListener {
+            startActivity(Intent(this, AdminActivity::class.java))
+        }
 
         setupSearch()
         setupFilter()
     }
 
     private fun observeViewModel() {
-        viewModel.courses.observe(this) { list ->
-            allCourses = list
-            applySearchAndFilter()
+        // מאזינים ל־LiveData של הרשימה המסוננת
+        viewModel.filteredCourses.observe(this) { list ->
+            adapter.submitList(list)
         }
-        viewModel.isLoading.observe(this) {
-            progressBar.visibility = if (it) View.VISIBLE else View.GONE
-        }
-    }
 
-    private fun applySearchAndFilter() {
-        var filtered = allCourses
-        if (!currentSelectedCategories.contains("All")) {
-            filtered = filtered.filter { it.category in currentSelectedCategories }
+        // מאזינים ל־loading
+        viewModel.isLoading.observe(this) { loading ->
+            progressBar.visibility = if (loading) View.VISIBLE else View.GONE
         }
-        val query = currentSearchQuery.trim()
-        if (query.isNotEmpty()) {
-            filtered = filtered.filter { it.title.contains(query, ignoreCase = true) }
-        }
-        adapter.submitList(filtered)
     }
 
     private fun setupSearch() {
         searchInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                currentSearchQuery = s.toString()
-                applySearchAndFilter()
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                viewModel.updateSearchAndFilter(query = s.toString())
             }
-            override fun afterTextChanged(s: Editable?) {}
         })
     }
 
     private fun setupFilter() {
-        val categories = arrayOf("All", "Computer Science", "Education", "Economics", "Behavioral Sciences")
-        val checked = BooleanArray(categories.size)
-        checked[0] = true
-
         btnFilter.setOnClickListener {
-            AlertDialog.Builder(this)
-                .setTitle("Choose categories")
-                .setMultiChoiceItems(categories, checked) { _, which, isChecked ->
-                    if (which == 0 && isChecked) {
-                        checked.fill(false)
-                        checked[0] = true
-                        currentSelectedCategories = setOf("All")
-                    } else {
-                        checked[which] = isChecked
-                        currentSelectedCategories = mutableSetOf<String>().apply {
-                            for (i in categories.indices) {
-                                if (checked[i]) add(categories[i])
-                            }
-                            if (isEmpty()) add("All")
-                            remove("All")
-                        }
-                    }
-                    applySearchAndFilter()
-                }
-                .setPositiveButton("OK", null)
-                .show()
+            val categories = arrayOf("All", "Computer Science", "Education", "Economics", "Behavioral Sciences") // דוגמה
+            val selectedCategories = mutableSetOf<String>()
+            val checkedItems = BooleanArray(categories.size) { false }
+
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Select Categories")
+            builder.setMultiChoiceItems(categories, checkedItems) { _, which, isChecked ->
+                if (isChecked) selectedCategories.add(categories[which])
+                else selectedCategories.remove(categories[which])
+            }
+            builder.setPositiveButton("Apply") { _, _ ->
+                if (selectedCategories.isEmpty()) selectedCategories.add("All")
+                viewModel.updateSearchAndFilter(categories = selectedCategories)
+            }
+            builder.setNegativeButton("Cancel", null)
+            builder.show()
         }
     }
-}
 
-class CourseAdapter(private val onCourseClick: (CourseItem) -> Unit) :
-    RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
+    // Adapter
+    class CourseAdapter(private val onCourseClick: (CourseItem) -> Unit) :
+        RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
 
-    private var courses: List<CourseItem> = emptyList()
-    fun submitList(newList: List<CourseItem>) {
-        courses = newList
-        notifyDataSetChanged()
-    }
+        private var courses: List<CourseItem> = emptyList()
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_course_row, parent, false)
-        return CourseViewHolder(view)
-    }
+        fun submitList(newList: List<CourseItem>) {
+            courses = newList
+            notifyDataSetChanged()
+        }
 
-    override fun onBindViewHolder(holder: CourseViewHolder, position: Int) {
-        holder.bind(courses[position], onCourseClick)
-    }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CourseViewHolder {
+            val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_course_row, parent, false)
+            return CourseViewHolder(view)
+        }
 
-    override fun getItemCount() = courses.size
+        override fun onBindViewHolder(holder: CourseViewHolder, position: Int) {
+            holder.bind(courses[position], onCourseClick)
+        }
 
-    class CourseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun bind(course: CourseItem, onClick: (CourseItem) -> Unit) {
-            val title = itemView.findViewById<TextView>(R.id.tvCourseTitle)
-            val description = itemView.findViewById<TextView>(R.id.tvCourseDescription)
-            val image = itemView.findViewById<ImageView>(R.id.ivCourseImage)
-            title.text = course.title
-            description.text = course.description
-            if (!course.imageUrl.isNullOrEmpty()) Picasso.get().load(course.imageUrl).into(image)
-            else image.setImageResource(R.drawable.cs1)
-            itemView.setOnClickListener { onClick(course) }
+        override fun getItemCount() = courses.size
+
+        class CourseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+            fun bind(course: CourseItem, onClick: (CourseItem) -> Unit) {
+                val title = itemView.findViewById<TextView>(R.id.tvCourseTitle)
+                val description = itemView.findViewById<TextView>(R.id.tvCourseDescription)
+                val image = itemView.findViewById<ImageView>(R.id.ivCourseImage)
+                title.text = course.title
+                description.text = course.description
+                if (!course.imageUrl.isNullOrEmpty()) Picasso.get().load(course.imageUrl).into(image)
+                else image.setImageResource(R.drawable.cs1)
+                itemView.setOnClickListener { onClick(course) }
+            }
         }
     }
 }

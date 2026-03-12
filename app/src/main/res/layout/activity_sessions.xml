@@ -10,7 +10,7 @@
         android:id="@+id/catalog_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="My Session"
+        android:text="All Course Session"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/black"
@@ -22,13 +22,13 @@
         android:id="@+id/tvCourseHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="8dp"
         android:textColor="@color/black"
         android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/catalog_title"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"/>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvSessions"
@@ -57,6 +57,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="24dp"
         android:src="@android:drawable/ic_input_add"
+        android:contentDescription="Add new session"
         app:backgroundTint="@color/lightBlue"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

@@ -20,7 +20,12 @@ class AttendanceRepository {
             transaction.update(db.collection("sessions").document(sessionId), "participantsCount", FieldValue.increment(1))
         }.addOnCompleteListener { onComplete(it.isSuccessful) }
     }
-
+    fun unenrollFromSession(userId: String, sessionId: String, onComplete: (Boolean) -> Unit) {
+        val attendanceId = "${userId}_${sessionId}"
+        db.collection("attendance").document(attendanceId)
+            .delete()
+            .addOnCompleteListener { onComplete(it.isSuccessful) }
+    }
     // שליפת המפגשים אליהם הסטודנט נרשם
     fun getUserAttendances(userId: String, onResult: (List<Attendance>) -> Unit) {
         db.collection("attendance").whereEqualTo("userId", userId).get()

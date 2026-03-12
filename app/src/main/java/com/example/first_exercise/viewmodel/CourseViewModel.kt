@@ -7,21 +7,46 @@ import com.example.first_exercise.model.CourseItem
 import com.example.first_exercise.repository.CourseRepository
 
 class CourseViewModel : ViewModel() {
-    private val repository = CourseRepository()
+    private val repo = CourseRepository()
 
-    // רשימת הקורסים שתצוגת ה-Activity תאזין לה
-    private val _courses = MutableLiveData<List<CourseItem>>()
-    val courses: LiveData<List<CourseItem>> = _courses
+    private val _allCourses = MutableLiveData<List<CourseItem>>()
+    private val _filteredCourses = MutableLiveData<List<CourseItem>>()
+    val filteredCourses: LiveData<List<CourseItem>> = _filteredCourses
 
-    // מצב טעינה להצגת Progress Bar
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
-    fun loadCourses() {
+    private var currentSearchQuery: String = ""
+    private var currentSelectedCategories: Set<String> = setOf("All")
+
+    init {
+        startListeningCourses() // מתחיל להקשיב לשינויים ב-DB מיד
+    }
+
+    private fun startListeningCourses() {
         _isLoading.value = true
-        repository.getAllCourses { list ->
-            _courses.postValue(list)
-            _isLoading.postValue(false)
+        repo.observeCourses { courses ->
+            _allCourses.value = courses
+            _isLoading.value = false
+            applySearchAndFilter() // מעדכן את הרשימה המסוננת ברגע שיש מידע חדש
         }
+    }
+
+    fun updateSearchAndFilter(query: String? = null, categories: Set<String>? = null) {
+        query?.let { currentSearchQuery = it }
+        categories?.let { currentSelectedCategories = it }
+        applySearchAndFilter()
+    }
+
+    private fun applySearchAndFilter() {
+        var filtered = _allCourses.value ?: emptyList()
+        // לוגיקת סינון...
+        if (!currentSelectedCategories.contains("All")) {
+            filtered = filtered.filter { it.category in currentSelectedCategories }
+        }
+        if (currentSearchQuery.isNotEmpty()) {
+            filtered = filtered.filter { it.title.contains(currentSearchQuery, ignoreCase = true) }
+        }
+        _filteredCourses.value = filtered
     }
 }

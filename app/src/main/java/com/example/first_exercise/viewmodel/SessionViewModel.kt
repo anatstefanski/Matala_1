@@ -7,7 +7,7 @@ import com.example.first_exercise.model.StudySession
 import com.example.first_exercise.repository.AttendanceRepository
 import com.example.first_exercise.repository.SessionRepository
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 
 class SessionViewModel : ViewModel() {
 
@@ -17,16 +17,19 @@ class SessionViewModel : ViewModel() {
 
     private val _sessions = MutableLiveData<List<StudySession>>()
     val sessions: LiveData<List<StudySession>> = _sessions
+
     val isLoading = MutableLiveData<Boolean>()
+    private var listenerRegistration: ListenerRegistration? = null
 
     fun loadSessionsForCourse(courseId: String) {
         isLoading.value = true
-        sessionRepo.getSessionsByCourse(courseId) { list ->
+        listenerRegistration?.remove()
+
+        listenerRegistration = sessionRepo.observeSessionsByCourse(courseId) { list ->
             _sessions.postValue(list)
             isLoading.postValue(false)
         }
     }
-
     fun toggleRegistration(session: StudySession, isRegistering: Boolean, courseId: String) {
         val userId = auth.currentUser?.uid ?: return
 
@@ -35,20 +38,20 @@ class SessionViewModel : ViewModel() {
                 if (success) updateSessionRegistration(session.sessionId, true)
             }
         } else {
-            val attendanceId = "${userId}_${session.sessionId}"
-            FirebaseFirestore.getInstance()
-                .collection("attendance")
-                .document(attendanceId)
-                .delete()
-                .addOnSuccessListener { updateSessionRegistration(session.sessionId, false) }
+            attendanceRepo.unenrollFromSession(userId, session.sessionId) { success ->
+                if (success) updateSessionRegistration(session.sessionId, false)
+            }
         }
     }
-
     private fun updateSessionRegistration(sessionId: String, isRegistered: Boolean) {
-        val updatedList = _sessions.value?.map {
-            if (it.sessionId == sessionId) it.copy(isUserRegistered = isRegistered)
-            else it
+        val updated = _sessions.value?.map {
+            if (it.sessionId == sessionId) it.copy(isUserRegistered = isRegistered) else it
         }
-        _sessions.postValue(updatedList)
+        _sessions.postValue(updated)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        listenerRegistration?.remove()
     }
 }

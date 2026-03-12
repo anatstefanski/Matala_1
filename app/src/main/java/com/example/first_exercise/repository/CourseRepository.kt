@@ -3,34 +3,43 @@ package com.example.first_exercise.repository
 import android.util.Log
 import com.example.first_exercise.model.CourseItem
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 
 class CourseRepository {
-    private val db = FirebaseFirestore.getInstance()
-    private val coursesCollection = db.collection("courses")
 
-    // הוספת קורס חדש (לשימוש המנהל)
+    private val firestore = FirebaseFirestore.getInstance()
+    private val coursesRef = firestore.collection("courses")
+
+    // הוספת קורס חדש (לשימוש Admin)
     fun addCourse(course: CourseItem, onComplete: (Boolean) -> Unit) {
-        val id = coursesCollection.document().id
-        val courseWithId = course.copy(courseId = id)
-        coursesCollection.document(id).set(courseWithId)
+
+        val courseId = coursesRef.document().id
+        val courseWithId = course.copy(courseId = courseId)
+
+        coursesRef.document(courseId)
+            .set(courseWithId)
             .addOnCompleteListener { onComplete(it.isSuccessful) }
     }
 
-    // שליפת כל הקורסים הקיימים (לצורך הצגה ב-Spinner או סינון)
-    fun getAllCourses(onResult: (List<CourseItem>) -> Unit) {
-        coursesCollection.get()
-            .addOnSuccessListener { snapshot ->
-                val list = snapshot.toObjects(CourseItem::class.java)
-                onResult(list)
-            }
-            .addOnFailureListener {
-                onResult(emptyList())
-            }
-            .addOnSuccessListener { snapshot ->
-                Log.d("COURSES", "size = ${snapshot.size()}")
-                val list = snapshot.toObjects(CourseItem::class.java)
-                onResult(list)
-            }
-    }
 
+    // שליפת קורסים בזמן אמת (Realtime updates)
+    fun observeCourses(onResult: (List<CourseItem>) -> Unit): ListenerRegistration {
+
+        return coursesRef.addSnapshotListener { snapshot, error ->
+
+            if (error != null) {
+                Log.e("COURSES", "Listen failed", error)
+                onResult(emptyList())
+                return@addSnapshotListener
+            }
+
+            val courses = snapshot
+                ?.toObjects(CourseItem::class.java)
+                ?: emptyList()
+
+            Log.d("COURSES", "size = ${courses.size}")
+
+            onResult(courses)
+        }
+    }
 }
