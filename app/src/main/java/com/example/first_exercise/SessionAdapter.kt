@@ -11,7 +11,8 @@ import com.example.first_exercise.model.StudySession
 class SessionAdapter(
     private val courseId: String,
     private val onRegClick: (StudySession, Boolean) -> Unit,
-    private val onLocClick: (StudySession) -> Unit
+    private val onLocClick: (StudySession) -> Unit,
+    private val onSessionClick: (StudySession) -> Unit
 ) : RecyclerView.Adapter<SessionAdapter.SessionViewHolder>() {
 
     private var items = listOf<StudySession>()
@@ -37,6 +38,9 @@ class SessionAdapter(
             itemView.findViewById<TextView>(R.id.tvSessionDate).text = "${session.date} | ${session.time}"
 
             val cb = itemView.findViewById<CheckBox>(R.id.cbRegister)
+            if(courseId.isEmpty()){
+                cb.visibility = View.GONE
+            }
             cb.setOnCheckedChangeListener(null)
             cb.isChecked = session.isUserRegistered
             cb.setOnCheckedChangeListener { _, isChecked ->
@@ -45,6 +49,9 @@ class SessionAdapter(
 
             itemView.findViewById<TextView>(R.id.tvLocation).setOnClickListener {
                 onLocClick(session)
+            }
+            itemView.setOnClickListener {
+                onSessionClick(session)
             }
         }
     }

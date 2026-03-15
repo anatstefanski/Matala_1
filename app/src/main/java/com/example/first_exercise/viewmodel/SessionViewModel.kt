@@ -22,12 +22,31 @@ class SessionViewModel : ViewModel() {
     private var listenerRegistration: ListenerRegistration? = null
 
     fun loadSessionsForCourse(courseId: String) {
+
         isLoading.value = true
         listenerRegistration?.remove()
 
-        listenerRegistration = sessionRepo.observeSessionsByCourse(courseId) { list ->
-            _sessions.postValue(list)
-            isLoading.postValue(false)
+        val userId = auth.currentUser?.uid ?: return
+
+        listenerRegistration = sessionRepo.observeSessionsByCourse(courseId) { sessions ->
+
+            attendanceRepo.getUserAttendances(userId) { attendances ->
+
+                val registeredIds = attendances.map { it.sessionId }
+
+                val updatedSessions = sessions.map { session ->
+
+                    session.copy(
+                        isUserRegistered = registeredIds.contains(session.sessionId)
+                    )
+
+                }
+
+                _sessions.postValue(updatedSessions)
+                isLoading.postValue(false)
+
+            }
+
         }
     }
     fun toggleRegistration(session: StudySession, isRegistering: Boolean, courseId: String) {
@@ -45,9 +64,12 @@ class SessionViewModel : ViewModel() {
     }
     private fun updateSessionRegistration(sessionId: String, isRegistered: Boolean) {
         val updated = _sessions.value?.map {
-            if (it.sessionId == sessionId) it.copy(isUserRegistered = isRegistered) else it
+            if (it.sessionId == sessionId)
+                it.copy(isUserRegistered = isRegistered)
+            else it
         }
-        _sessions.postValue(updated)
+
+        _sessions.postValue(updated ?: emptyList())
     }
 
     override fun onCleared() {

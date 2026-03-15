@@ -5,6 +5,9 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
 class CourseRepository {
+    private val db = FirebaseFirestore.getInstance()
+    private val courseCollection = db.collection("course")
+
 
     private val firestore = FirebaseFirestore.getInstance()
     private val coursesRef = firestore.collection("courses")
@@ -59,5 +62,23 @@ class CourseRepository {
         coursesRef.document(courseId)
             .set(courseWithId)
             .addOnCompleteListener { onComplete(it.isSuccessful) }
+    }
+
+    fun getCoursesByIds(ids: List<String>, onResult: (List<CourseItem>) -> Unit) {
+
+        if(ids.isEmpty()){
+            onResult(emptyList())
+            return
+        }
+
+        courseCollection
+            .whereIn("courseId", ids)
+            .get()
+            .addOnSuccessListener {
+
+                val courses = it.toObjects(CourseItem::class.java)
+
+                onResult(courses)
+            }
     }
 }

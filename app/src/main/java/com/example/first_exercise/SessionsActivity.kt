@@ -44,7 +44,8 @@ class SessionsActivity : AppCompatActivity() {
             },
             onLocClick = { session ->
                 openMaps(session.latitude, session.longitude)
-            }
+            },
+            onSessionClick = { } // כאן לא צריך לעשות כלום
         )
 
         setupUI()

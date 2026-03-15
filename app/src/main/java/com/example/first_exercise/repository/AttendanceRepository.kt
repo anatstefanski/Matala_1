@@ -1,56 +1,74 @@
 package com.example.first_exercise.repository
 
 import com.example.first_exercise.model.Attendance
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 
 class AttendanceRepository {
+
     private val db = FirebaseFirestore.getInstance()
+    private val attendanceCollection = db.collection("attendance")
 
-    // הרשמה למפגש (מבצע 2 פעולות: יוצר מסמך הרשמה ומעדכן מונה במפגש)
-    fun enrollToSession(userId: String, sessionId: String, courseId: String, onComplete: (Boolean) -> Unit) {
-        val attendanceId = "${userId}_${sessionId}"
-        val attendance = Attendance(attendanceId, userId, sessionId, courseId)
+    fun enrollToSession(
+        userId: String,
+        sessionId: String,
+        courseId: String,
+        onComplete: (Boolean) -> Unit
+    ) {
 
-        db.runTransaction { transaction ->
-            // 1. הוספת רשומת נוכחות
-            transaction.set(db.collection("attendance").document(attendanceId), attendance)
+        val id = "${userId}_${sessionId}"
 
-            // 2. עדכון מונה המשתתפים במפגש (בשביל הסטטיסטיקה)
-            transaction.update(db.collection("sessions").document(sessionId), "participantsCount", FieldValue.increment(1))
-        }.addOnCompleteListener { onComplete(it.isSuccessful) }
-    }
-//    fun unenrollFromSession(userId: String, sessionId: String, onComplete: (Boolean) -> Unit) {
-//        val attendanceId = "${userId}_${sessionId}"
-//        db.collection("attendance").document(attendanceId)
-//            .delete()
-//            .addOnCompleteListener { onComplete(it.isSuccessful) }
-//    }
-fun unenrollFromSession(userId: String, sessionId: String, onComplete: (Boolean) -> Unit) {
-
-    val attendanceId = "${userId}_${sessionId}"
-
-    db.runTransaction { transaction ->
-
-        transaction.delete(
-            db.collection("attendance").document(attendanceId)
+        val attendance = Attendance(
+            attendanceId = id,
+            userId = userId,
+            sessionId = sessionId,
+            courseId = courseId
         )
 
-        transaction.update(
-            db.collection("sessions").document(sessionId),
-            "participantsCount",
-            FieldValue.increment(-1)
-        )
-
-    }.addOnCompleteListener {
-        onComplete(it.isSuccessful)
+        attendanceCollection
+            .document(id)
+            .set(attendance)
+            .addOnSuccessListener { onComplete(true) }
+            .addOnFailureListener { onComplete(false) }
     }
-}
-    // שליפת המפגשים אליהם הסטודנט נרשם
-    fun getUserAttendances(userId: String, onResult: (List<Attendance>) -> Unit) {
-        db.collection("attendance").whereEqualTo("userId", userId).get()
-            .addOnSuccessListener { snapshot ->
-                onResult(snapshot.toObjects(Attendance::class.java))
+
+    fun unenrollFromSession(
+        userId: String,
+        sessionId: String,
+        onComplete: (Boolean) -> Unit
+    ) {
+
+        attendanceCollection
+            .whereEqualTo("userId", userId)
+            .whereEqualTo("sessionId", sessionId)
+            .get()
+            .addOnSuccessListener {
+
+                val batch = db.batch()
+
+                for(doc in it.documents){
+                    batch.delete(doc.reference)
+                }
+
+                batch.commit()
+                    .addOnSuccessListener { onComplete(true) }
+                    .addOnFailureListener { onComplete(false) }
+
+            }
+    }
+
+    fun getUserAttendances(
+        userId: String,
+        onResult: (List<Attendance>) -> Unit
+    ){
+
+        attendanceCollection
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener {
+
+                val list = it.toObjects(Attendance::class.java)
+                onResult(list)
+
             }
     }
 }
