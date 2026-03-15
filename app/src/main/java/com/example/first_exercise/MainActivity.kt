@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
 
         val recyclerView = findViewById<RecyclerView>(R.id.rvCourses)
         val fabAddCourse = findViewById<FloatingActionButton>(R.id.fabAdd)
-
+        val btnMySessions = findViewById<MaterialButton>(R.id.btnMySessions)
 
         searchInput = findViewById(R.id.search_input)
         btnFilter = findViewById(R.id.btnFilter)
@@ -93,6 +93,17 @@ class MainActivity : AppCompatActivity() {
             viewModel.loadMoreCourses()
         }
 
+        btnMySessions.visibility =
+            if (isAdmin) View.GONE
+            else View.VISIBLE
+
+        btnMySessions.setOnClickListener {
+
+            startActivity(
+                Intent(this, MySessionsActivity::class.java)
+            )
+
+        }
 
         setupSearch()
         setupFilter()

@@ -37,5 +37,23 @@ class SessionRepository {
             .addOnSuccessListener { onComplete(true) }
             .addOnFailureListener { onComplete(false) }
     }
+
+    fun getSessionsByIds(ids: List<String>, onResult: (List<StudySession>) -> Unit) {
+
+        if(ids.isEmpty()){
+            onResult(emptyList())
+            return
+        }
+
+        db.collection("session")
+            .whereIn("sessionId", ids)
+            .get()
+            .addOnSuccessListener {
+
+                val sessions = it.toObjects(StudySession::class.java)
+
+                onResult(sessions)
+            }
+    }
 }
 

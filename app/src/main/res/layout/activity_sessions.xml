@@ -41,6 +41,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvCourseHeader" />
 
+    <TextView
+        android:id="@+id/tvEmptySessions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No sessions yet"
+        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/rvSessions"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <ProgressBar
         android:id="@+id/progressBarSessions"
         android:layout_width="wrap_content"

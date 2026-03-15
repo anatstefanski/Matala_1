@@ -25,6 +25,9 @@
         <activity
             android:name=".EditProfileActivity"
             android:exported="false" />
+        <activity
+            android:name=".MySessionsActivity"
+            android:exported="false" />
 
         <activity
             android:name=".LoginActivity"
