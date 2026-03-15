@@ -7,9 +7,10 @@ import com.example.first_exercise.model.CourseItem
 import com.example.first_exercise.repository.CourseRepository
 
 class CourseViewModel : ViewModel() {
+
     private val repo = CourseRepository()
 
-    private val _allCourses = MutableLiveData<List<CourseItem>>()
+    private val _allCourses = MutableLiveData<MutableList<CourseItem>>(mutableListOf())
     private val _filteredCourses = MutableLiveData<List<CourseItem>>()
     val filteredCourses: LiveData<List<CourseItem>> = _filteredCourses
 
@@ -20,33 +21,63 @@ class CourseViewModel : ViewModel() {
     private var currentSelectedCategories: Set<String> = setOf("All")
 
     init {
-        startListeningCourses() // מתחיל להקשיב לשינויים ב-DB מיד
+        loadFirstCourses()
     }
 
-    private fun startListeningCourses() {
+    fun loadFirstCourses() {
+
         _isLoading.value = true
-        repo.observeCourses { courses ->
-            _allCourses.value = courses
-            _isLoading.value = false
-            applySearchAndFilter() // מעדכן את הרשימה המסוננת ברגע שיש מידע חדש
+
+        repo.getFirstCourses { courses ->
+
+            _allCourses.value = courses.toMutableList()
+
+            _isLoading.postValue(false)
+
+            applySearchAndFilter()
+        }
+    }
+
+    fun loadMoreCourses() {
+
+        repo.getMoreCourses { moreCourses ->
+
+            val currentList = _allCourses.value ?: mutableListOf()
+
+            currentList.addAll(moreCourses)
+
+            _allCourses.postValue(currentList)
+
+            applySearchAndFilter()
         }
     }
 
     fun updateSearchAndFilter(query: String? = null, categories: Set<String>? = null) {
+
         query?.let { currentSearchQuery = it }
         categories?.let { currentSelectedCategories = it }
+
         applySearchAndFilter()
     }
 
     private fun applySearchAndFilter() {
+
         var filtered = _allCourses.value ?: emptyList()
-        // לוגיקת סינון...
+
         if (!currentSelectedCategories.contains("All")) {
-            filtered = filtered.filter { it.category in currentSelectedCategories }
+
+            filtered = filtered.filter {
+                it.category in currentSelectedCategories
+            }
         }
+
         if (currentSearchQuery.isNotEmpty()) {
-            filtered = filtered.filter { it.title.contains(currentSearchQuery, ignoreCase = true) }
+
+            filtered = filtered.filter {
+                it.title.contains(currentSearchQuery, true)
+            }
         }
+
         _filteredCourses.value = filtered
     }
 }
