@@ -9,6 +9,8 @@ data class StudySession(
     val time: String = "",
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
+    val locationAddress: String = "",    // כתובת מלאה להצגה במסכים
+    val locationSource: String = "" ,// "current" / "manual"
     val zoomUrl: String? = null,
     val participantsCount: Int = 0 ,// שדה לסטטיסטיקה: כמה סטודנטים נרשמו
     var isUserRegistered: Boolean = false // שדה מקומי לעדכון האדאפטר

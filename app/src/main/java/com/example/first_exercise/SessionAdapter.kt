@@ -38,18 +38,30 @@ class SessionAdapter(
             itemView.findViewById<TextView>(R.id.tvSessionDate).text = "${session.date} | ${session.time}"
 
             val cb = itemView.findViewById<CheckBox>(R.id.cbRegister)
-            if(courseId.isEmpty()){
+            if (courseId.isEmpty()) {
                 cb.visibility = View.GONE
             }
+
             cb.setOnCheckedChangeListener(null)
             cb.isChecked = session.isUserRegistered
             cb.setOnCheckedChangeListener { _, isChecked ->
                 onRegClick(session, isChecked)
             }
 
-            itemView.findViewById<TextView>(R.id.tvLocation).setOnClickListener {
-                onLocClick(session)
+            val tvLocation = itemView.findViewById<TextView>(R.id.tvLocation)
+            if (session.latitude == 0.0 && session.longitude == 0.0) {
+                tvLocation.text = "No location available"
+                tvLocation.isEnabled = false
+                tvLocation.alpha = 0.5f
+            } else {
+                tvLocation.text = "📍Navigation to the session"
+                tvLocation.isEnabled = true
+                tvLocation.alpha = 1f
+                tvLocation.setOnClickListener {
+                    onLocClick(session)
+                }
             }
+
             itemView.setOnClickListener {
                 onSessionClick(session)
             }

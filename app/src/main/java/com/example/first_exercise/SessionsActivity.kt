@@ -12,6 +12,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.first_exercise.viewmodel.SessionViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import android.widget.Toast
+import com.android.volley.Request
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
+import com.example.first_exercise.App
+import java.net.URLEncoder
 
 class SessionsActivity : AppCompatActivity() {
 
@@ -43,7 +50,11 @@ class SessionsActivity : AppCompatActivity() {
                 vm.toggleRegistration(session, isChecked, courseId)
             },
             onLocClick = { session ->
-                openMaps(session.latitude, session.longitude)
+                if (session.latitude == 0.0 && session.longitude == 0.0) {
+                    Toast.makeText(this, "No location available", Toast.LENGTH_SHORT).show()
+                } else {
+                    openMaps(session.latitude, session.longitude)
+                }
             },
             onSessionClick = { } // כאן לא צריך לעשות כלום
         )
