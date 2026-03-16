@@ -5,9 +5,6 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 
 class CourseRepository {
-    private val db = FirebaseFirestore.getInstance()
-    private val courseCollection = db.collection("course")
-
 
     private val firestore = FirebaseFirestore.getInstance()
     private val coursesRef = firestore.collection("courses")
@@ -16,7 +13,6 @@ class CourseRepository {
     private var lastVisible: DocumentSnapshot? = null
 
     fun getFirstCourses(onResult: (List<CourseItem>) -> Unit) {
-
         coursesRef
             .orderBy("title")
             .limit(pageSize.toLong())
@@ -28,14 +24,18 @@ class CourseRepository {
                 }
 
                 val courses = snapshot.toObjects(CourseItem::class.java)
-
                 onResult(courses)
+            }
+            .addOnFailureListener {
+                onResult(emptyList())
             }
     }
 
     fun getMoreCourses(onResult: (List<CourseItem>) -> Unit) {
-
-        val last = lastVisible ?: return
+        val last = lastVisible ?: run {
+            onResult(emptyList())
+            return
+        }
 
         coursesRef
             .orderBy("title")
@@ -49,13 +49,14 @@ class CourseRepository {
                 }
 
                 val courses = snapshot.toObjects(CourseItem::class.java)
-
                 onResult(courses)
+            }
+            .addOnFailureListener {
+                onResult(emptyList())
             }
     }
 
     fun addCourse(course: CourseItem, onComplete: (Boolean) -> Unit) {
-
         val courseId = coursesRef.document().id
         val courseWithId = course.copy(courseId = courseId)
 
@@ -65,20 +66,20 @@ class CourseRepository {
     }
 
     fun getCoursesByIds(ids: List<String>, onResult: (List<CourseItem>) -> Unit) {
-
-        if(ids.isEmpty()){
+        if (ids.isEmpty()) {
             onResult(emptyList())
             return
         }
 
-        courseCollection
+        coursesRef
             .whereIn("courseId", ids)
             .get()
             .addOnSuccessListener {
-
                 val courses = it.toObjects(CourseItem::class.java)
-
                 onResult(courses)
+            }
+            .addOnFailureListener {
+                onResult(emptyList())
             }
     }
 }
