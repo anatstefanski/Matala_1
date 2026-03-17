@@ -5,5 +5,5 @@ data class Attendance(
     val userId: String = "",         // מזהה הסטודנט
     val sessionId: String = "",      // מזהה המפגש
     val courseId: String = "",       //
-
+    val lastReadTimestamp: Long = 0L
 )

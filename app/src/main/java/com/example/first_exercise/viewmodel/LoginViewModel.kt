@@ -59,6 +59,10 @@ class LoginViewModel : ViewModel() {
             onResult(false)
         }
     }
+    fun getCurrentUserId(): String? {
+        return repo.currentUid()
+    }
+
 }
 
 sealed class LoginState {

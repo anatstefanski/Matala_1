@@ -28,8 +28,11 @@ class LoginActivity : AppCompatActivity() {
         // 1) If already logged in -> go directly to MainActivity
         if (vm.isLoggedIn()) {
             vm.checkAdminForExistingUser { isAdmin ->
-                val intent = Intent(this, MainActivity::class.java)
-                intent.putExtra("IS_ADMIN", isAdmin)
+                val userId = vm.getCurrentUserId() ?: "" // שליפה דרך ה-VM
+                val intent = Intent(this, MainActivity::class.java).apply {
+                    putExtra("IS_ADMIN", isAdmin)
+                    putExtra("USER_ID", userId) // העברה ל-Main
+                }
                 startActivity(intent)
                 finish()
             }
@@ -44,8 +47,11 @@ class LoginActivity : AppCompatActivity() {
                 }
                 is LoginState.Success -> {
                     Toast.makeText(this, "Logged in!", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this, MainActivity::class.java)
-                    intent.putExtra("IS_ADMIN", state.isAdmin) // מעבירים את הנתון הלאה
+                    val userId = vm.getCurrentUserId() ?: "" // שליפה דרך ה-VM
+                    val intent = Intent(this, MainActivity::class.java).apply {
+                        putExtra("IS_ADMIN", state.isAdmin)
+                        putExtra("USER_ID", userId) // העברה ל-Main
+                    }
                     startActivity(intent)
                     finish()
                 }

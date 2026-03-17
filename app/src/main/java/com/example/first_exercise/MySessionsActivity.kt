@@ -27,10 +27,12 @@ class MySessionsActivity : AppCompatActivity() {
     private lateinit var emptyText: TextView
     private lateinit var summaryText: TextView
     private lateinit var adapter: SessionAdapter
+    private var userId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_sessions)
+        userId=intent.getStringExtra("USER_ID") ?: ""
 
         rv = findViewById(R.id.MySessions)
         pieChart = findViewById(R.id.pieChart)
@@ -38,15 +40,19 @@ class MySessionsActivity : AppCompatActivity() {
         summaryText = findViewById(R.id.tvCategorySummary)
 
         rv.layoutManager = LinearLayoutManager(this)
-
+        vm.unreadCounts.observe(this) { countsMap ->
+            // עדכון ה-Adapter עם המפה החדשה של המונים
+            adapter.updateUnreadCounts(countsMap)
+        }
         adapter = SessionAdapter(
             courseId = "",
             onRegClick = { _, _ -> },
             onLocClick = { },
             onSessionClick = { session ->
-                val intent = Intent(this, SessionsActivity::class.java).apply {
-                    putExtra("COURSE_ID", session.courseId)
-                    putExtra("COURSE_NAME", session.courseName)
+                val intent = Intent(this, ChatActivity::class.java).apply {
+                    putExtra("USER_ID", userId)
+                    putExtra("SESSION_ID", session.sessionId)
+                    putExtra("SESSION_TOPIC", session.topic)
                 }
                 startActivity(intent)
             }
@@ -66,6 +72,7 @@ class MySessionsActivity : AppCompatActivity() {
         }
 
         vm.loadMySessions()
+
     }
     override fun onResume() {
         super.onResume()

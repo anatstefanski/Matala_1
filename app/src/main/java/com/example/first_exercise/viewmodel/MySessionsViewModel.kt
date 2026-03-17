@@ -1,9 +1,11 @@
 package com.example.first_exercise.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.first_exercise.model.StudySession
 import com.example.first_exercise.repository.AttendanceRepository
+import com.example.first_exercise.repository.ChatRepository
 import com.example.first_exercise.repository.CourseRepository
 import com.example.first_exercise.repository.SessionRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -14,6 +16,11 @@ class MySessionsViewModel : ViewModel() {
     private val sessionRepo = SessionRepository()
     private val courseRepo = CourseRepository()
     private val auth = FirebaseAuth.getInstance()
+
+    private val chatRepo = ChatRepository()
+    private val _unreadCounts = MutableLiveData<Map<String, Int>>()
+
+    val unreadCounts: LiveData<Map<String, Int>> = _unreadCounts
 
     val sessions = MutableLiveData<List<StudySession>>()
     val categoryCounts = MutableLiveData<Map<String, Int>>()
@@ -49,6 +56,7 @@ class MySessionsViewModel : ViewModel() {
                     categoryCounts.postValue(defaultCounts)
                     return@getSessionsByIds
                 }
+                loadUnreadCounts(userId, sessionList)
 
                 val courseIds = sessionList.map { it.courseId }.distinct()
 
@@ -67,6 +75,27 @@ class MySessionsViewModel : ViewModel() {
 
                     sessions.postValue(sessionList)
                     categoryCounts.postValue(counts)
+
+                }
+            }
+        }
+    }
+
+
+    fun loadUnreadCounts(userId: String, sessions: List<StudySession>) {
+        val counts = mutableMapOf<String, Int>()
+        var processed = 0
+        if (sessions.isEmpty()) {
+            _unreadCounts.postValue(emptyMap())
+            return
+        }
+
+        sessions.forEach { session ->
+            chatRepo.getUnreadCount(userId, session.sessionId) { count ->
+                counts[session.sessionId] = count
+                processed++
+                if (processed == sessions.size) {
+                    _unreadCounts.postValue(counts)
                 }
             }
         }

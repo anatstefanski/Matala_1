@@ -16,6 +16,12 @@ class SessionAdapter(
 ) : RecyclerView.Adapter<SessionAdapter.SessionViewHolder>() {
 
     private var items = listOf<StudySession>()
+    private var unreadCounts = mapOf<String, Int>()
+
+    fun updateUnreadCounts(newCounts: Map<String, Int>) {
+        unreadCounts = newCounts
+        notifyDataSetChanged()
+    }
     fun submitList(newList: List<StudySession>) {
         items = newList
         notifyDataSetChanged()
@@ -27,13 +33,15 @@ class SessionAdapter(
     }
 
     override fun onBindViewHolder(holder: SessionViewHolder, position: Int) {
-        holder.bind(items[position])
+        val session = items[position]
+        val count = unreadCounts[session.sessionId] ?: 0
+        holder.bind(session, count) // שליחת ה-count לפונקציית ה-bind הקיימת
     }
 
     override fun getItemCount() = items.size
 
     inner class SessionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        fun bind(session: StudySession) {
+        fun bind(session: StudySession,unreadCount: Int = 0) {
             itemView.findViewById<TextView>(R.id.tvSessionTopic).text = session.topic
             itemView.findViewById<TextView>(R.id.tvSessionDate).text = "${session.date} | ${session.time}"
 
@@ -64,6 +72,13 @@ class SessionAdapter(
 
             itemView.setOnClickListener {
                 onSessionClick(session)
+            }
+            val badge = itemView.findViewById<TextView>(R.id.tvSessionBadge)
+            if (unreadCount > 0) {
+                badge.visibility = View.VISIBLE
+                badge.text = unreadCount.toString()
+            } else {
+                badge.visibility = View.GONE
             }
         }
     }

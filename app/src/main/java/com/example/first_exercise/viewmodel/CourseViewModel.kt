@@ -4,11 +4,17 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.first_exercise.model.CourseItem
+import com.example.first_exercise.repository.AttendanceRepository
+import com.example.first_exercise.repository.ChatRepository
 import com.example.first_exercise.repository.CourseRepository
 
 class CourseViewModel : ViewModel() {
 
     private val repo = CourseRepository()
+    private val chatRepo = ChatRepository()
+    private val attendanceRepo = AttendanceRepository()
+    private val _totalUnreadCount = MutableLiveData<Int>()
+    val totalUnreadCount: LiveData<Int> = _totalUnreadCount
 
     private val _allCourses = MutableLiveData<MutableList<CourseItem>>(mutableListOf())
     private val _filteredCourses = MutableLiveData<List<CourseItem>>()
@@ -79,5 +85,25 @@ class CourseViewModel : ViewModel() {
         }
 
         _filteredCourses.value = filtered
+    }
+    fun loadTotalUnreadCount(userId: String) {
+        attendanceRepo.getUserAttendances(userId) { attendanceList ->
+            val sessionIds = attendanceList.map { it.sessionId }
+            var total = 0
+            var processed = 0
+            if (sessionIds.isEmpty()) {
+                _totalUnreadCount.postValue(0)
+                return@getUserAttendances
+            }
+            sessionIds.forEach { sessionId ->
+                chatRepo.getUnreadCount(userId, sessionId) { count ->
+                    total += count
+                    processed++
+                    if (processed == sessionIds.size) {
+                        _totalUnreadCount.postValue(total)
+                    }
+                }
+            }
+        }
     }
 }

@@ -31,6 +31,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var loadMoreButton: View
     private var isAdmin: Boolean = false
 
+    private var userId: String = ""
+
     private lateinit var searchInput: EditText
     private lateinit var btnFilter: TextView
 
@@ -39,6 +41,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         isAdmin = intent.getBooleanExtra("IS_ADMIN", false)
+
+        userId=intent.getStringExtra("USER_ID") ?: ""
 
         setupUI()
         observeViewModel()
@@ -52,6 +56,7 @@ class MainActivity : AppCompatActivity() {
 
             val intent = Intent(this, EditProfileActivity::class.java)
             startActivity(intent)
+
 
         }
     }
@@ -100,7 +105,8 @@ class MainActivity : AppCompatActivity() {
         btnMySessions.setOnClickListener {
 
             startActivity(
-                Intent(this, MySessionsActivity::class.java)
+                Intent(this, MySessionsActivity::class.java).putExtra("USER_ID",userId)
+
             )
 
         }
@@ -124,7 +130,15 @@ class MainActivity : AppCompatActivity() {
                 else View.GONE
 
         }
-
+        viewModel.totalUnreadCount.observe(this) { count ->
+            val badge = findViewById<TextView>(R.id.tvMainUnreadBadge)
+            if (count > 0) {
+                badge.visibility = View.VISIBLE
+                badge.text = count.toString()
+            } else {
+                badge.visibility = View.GONE
+            }
+        }
     }
 
     private fun setupSearch() {
@@ -245,6 +259,13 @@ class MainActivity : AppCompatActivity() {
 
                 }
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (userId.isNotEmpty()) {
+            viewModel.loadTotalUnreadCount(userId)
         }
     }
 }

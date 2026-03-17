@@ -122,4 +122,15 @@ class AuthRepository(
     fun logout() {
         auth.signOut()
     }
+
+    fun getUserName(uid: String, onResult: (String) -> Unit) {
+        db.collection("users").document(uid).get()
+            .addOnSuccessListener { doc ->
+                val name = doc.getString("fullName") ?: "Student"
+                onResult(name)
+            }
+            .addOnFailureListener {
+                onResult("Student")
+            }
+    }
 }
