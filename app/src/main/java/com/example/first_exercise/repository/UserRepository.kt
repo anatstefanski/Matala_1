@@ -26,17 +26,30 @@ class UserRepository(
     }
     fun updateUser(user: User, onResult: (Result<Unit>) -> Unit) {
 
+//        usersCol.document(user.uid)
+//            .set(user)
+//            .addOnSuccessListener {
+//
+//                onResult(Result.success(Unit))
+//
+//            }
+//            .addOnFailureListener { e ->
+//
+//                onResult(Result.failure(e))
+//
+//            }
         usersCol.document(user.uid)
-            .set(user)
+            .update(
+                mapOf(
+                    "fullName" to user.fullName,
+                    "email" to user.email
+                )
+            )
             .addOnSuccessListener {
-
                 onResult(Result.success(Unit))
-
             }
             .addOnFailureListener { e ->
-
                 onResult(Result.failure(e))
-
             }
     }
 }

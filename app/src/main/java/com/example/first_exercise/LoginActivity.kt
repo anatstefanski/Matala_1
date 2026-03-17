@@ -20,8 +20,8 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // זמני לבדיקה – מתנתק כל פעם שהמסך נפתח
-        FirebaseAuth.getInstance().signOut()
+//        // זמני לבדיקה – מתנתק כל פעם שהמסך נפתח
+//        FirebaseAuth.getInstance().signOut()
         // Link to login XML
         setContentView(R.layout.activity_login)
 
@@ -84,21 +84,28 @@ class LoginActivity : AppCompatActivity() {
             }
 
             // שליחת מייל לשינוי סיסמה
-            FirebaseAuth.getInstance().sendPasswordResetEmail(email)
-                .addOnSuccessListener {
-                    Toast.makeText(
-                        this,
-                        "Password reset email sent",
-                        Toast.LENGTH_LONG
-                    ).show()
+//            FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+//                .addOnSuccessListener {
+//                    Toast.makeText(
+//                        this,
+//                        "Password reset email sent",
+//                        Toast.LENGTH_LONG
+//                    ).show()
+//                }
+//                .addOnFailureListener {
+//                    Toast.makeText(
+//                        this,
+//                        "Failed to send reset email",
+//                        Toast.LENGTH_LONG
+//                    ).show()
+//                }
+            vm.resetPassword(email) { success, error ->
+                if (success) {
+                    Toast.makeText(this, "Password reset email sent", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this, error ?: "Failed to send reset email", Toast.LENGTH_LONG).show()
                 }
-                .addOnFailureListener {
-                    Toast.makeText(
-                        this,
-                        "Failed to send reset email",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
+            }
         }
 
         // 4) Click handler

@@ -58,10 +58,10 @@ class EditProfileActivity : AppCompatActivity() {
             }
             // ===== VALIDATIONS כמו REGISTER =====
 
-            val nameRegex = Regex("^[A-Za-z]{1,5}$")
+            val nameRegex = Regex("^[A-Za-z]{1,15}$")
 
             if (!newName.matches(nameRegex)) {
-                Toast.makeText(this, "Name must be 1-5 letters only", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Name must be 1-15 letters only", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 

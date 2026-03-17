@@ -56,11 +56,11 @@ class RegisterActivity : AppCompatActivity() {
             val email = emailInput.text.toString().trim()
             val pass = passInput.text.toString()
             val confirm = confirmInput.text.toString()
-            val nameRegex = Regex("^[A-Za-z]{1,5}$")
+            val nameRegex = Regex("^[A-Za-z]{1,15}$")
 
             // ולידציות ב-Controller (לפי הדרישה שה-View הוא Activity/Fragment)
             if (!fullName.matches(nameRegex)) {
-                toast("Full name must be 1–5 letters only")
+                toast("Full name must be 1–15 letters only")
                 return@setOnClickListener
             }
             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {

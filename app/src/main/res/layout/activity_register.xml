@@ -51,7 +51,7 @@
         android:layout_marginStart="36dp"
         android:layout_marginEnd="36dp"
         android:layout_marginTop="4dp"
-        android:text="* 1–5 letters only"
+        android:text="* 1–15 letters only"
         android:textSize="12sp"
         android:textColor="#666666"
         app:layout_constraintTop_toBottomOf="@id/fullname_input"

@@ -46,8 +46,9 @@ class SessionsActivity : AppCompatActivity() {
 
         adapter = SessionAdapter(
             courseId,
+            isAdmin,
             onRegClick = { session, isChecked ->
-                vm.toggleRegistration(session, isChecked, courseId)
+                vm.toggleRegistration(session, isChecked, courseId, isAdmin)
             },
             onLocClick = { session ->
                 if (session.latitude == 0.0 && session.longitude == 0.0) {

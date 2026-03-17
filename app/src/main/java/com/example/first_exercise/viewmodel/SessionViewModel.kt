@@ -49,7 +49,13 @@ class SessionViewModel : ViewModel() {
 
         }
     }
-    fun toggleRegistration(session: StudySession, isRegistering: Boolean, courseId: String) {
+    fun toggleRegistration(session: StudySession, isRegistering: Boolean, courseId: String, isAdmin: Boolean) {
+
+        // 🚨 חסימה אמיתית של אדמין
+        if (isAdmin) {
+            return
+        }
+
         val userId = auth.currentUser?.uid ?: return
 
         if (isRegistering) {

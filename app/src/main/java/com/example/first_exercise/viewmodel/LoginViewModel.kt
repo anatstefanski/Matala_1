@@ -63,6 +63,10 @@ class LoginViewModel : ViewModel() {
         return repo.currentUid()
     }
 
+    fun resetPassword(email: String, onResult: (Boolean, String?) -> Unit) {
+        repo.resetPassword(email, onResult)
+    }
+
 }
 
 sealed class LoginState {

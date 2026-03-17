@@ -46,6 +46,7 @@ class MySessionsActivity : AppCompatActivity() {
         }
         adapter = SessionAdapter(
             courseId = "",
+            isAdmin = false,
             onRegClick = { _, _ -> },
             onLocClick = { },
             onSessionClick = { session ->

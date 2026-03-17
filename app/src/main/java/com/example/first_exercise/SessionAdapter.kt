@@ -10,6 +10,7 @@ import com.example.first_exercise.model.StudySession
 
 class SessionAdapter(
     private val courseId: String,
+    private val isAdmin: Boolean,
     private val onRegClick: (StudySession, Boolean) -> Unit,
     private val onLocClick: (StudySession) -> Unit,
     private val onSessionClick: (StudySession) -> Unit
@@ -50,10 +51,23 @@ class SessionAdapter(
                 cb.visibility = View.GONE
             }
 
+
             cb.setOnCheckedChangeListener(null)
             cb.isChecked = session.isUserRegistered
+//            cb.setOnCheckedChangeListener { _, isChecked ->
+//                onRegClick(session, isChecked)
+//            }
+            if (isAdmin) {
+                cb.isEnabled = false
+                cb.alpha = 0.5f
+            } else {
+                cb.isEnabled = true
+                cb.alpha = 1f
+            }
             cb.setOnCheckedChangeListener { _, isChecked ->
-                onRegClick(session, isChecked)
+                if (!isAdmin) {
+                    onRegClick(session, isChecked)
+                }
             }
 
             val tvLocation = itemView.findViewById<TextView>(R.id.tvLocation)
