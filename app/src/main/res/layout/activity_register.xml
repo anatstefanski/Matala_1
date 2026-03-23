@@ -40,6 +40,8 @@
         android:textColor="@color/black"
         android:imeOptions="actionNext"
         android:singleLine="true"
+        app:layout_constraintWidth_max="480dp"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/title_register" />
@@ -54,6 +56,8 @@
         android:text="* 1–15 letters only"
         android:textSize="12sp"
         android:textColor="#666666"
+        app:layout_constraintWidth_max="480dp"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintTop_toBottomOf="@id/fullname_input"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -73,6 +77,8 @@
         android:textColor="@color/black"
         android:imeOptions="actionNext"
         android:singleLine="true"
+        app:layout_constraintWidth_max="480dp"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/username_hint_text" />
@@ -94,6 +100,8 @@
         android:textColor="@color/black"
         android:imeOptions="actionNext"
         android:singleLine="true"
+        app:layout_constraintWidth_max="480dp"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/email_input" />
@@ -108,6 +116,8 @@
         android:text="* 6 digits"
         android:textSize="12sp"
         android:textColor="#666666"
+        app:layout_constraintWidth_max="480dp"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintTop_toBottomOf="@id/password_input"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -129,6 +139,8 @@
         android:textColor="@color/black"
         android:imeOptions="actionDone"
         android:singleLine="true"
+        app:layout_constraintWidth_max="480dp"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/password_hint_text" />

@@ -8,7 +8,7 @@ import com.example.first_exercise.repository.AuthRepository
 import com.example.first_exercise.repository.UserRepository
 
 class EditProfileViewModel : ViewModel() {
-
+    // Connection to Firebase
     private val userRepo = UserRepository()
     private val authRepo = AuthRepository()
 
@@ -18,19 +18,24 @@ class EditProfileViewModel : ViewModel() {
     private val _updateResult = MutableLiveData<String>()
     val updateResult: LiveData<String> = _updateResult
 
+    /**
+     * Loads current user data from Firestore
+     */
     fun loadUser() {
 
+        // Get current user UID from Firebase Auth
         val uid = authRepo.currentUid() ?: return
-
         userRepo.getUser(uid) { result ->
-
             result.onSuccess {
                 _user.postValue(it)
             }
-
         }
     }
 
+    /**
+     * Updates user profile
+     * Handles different update scenarios: email, password, or name
+     */
     fun updateUser(fullName: String, email: String, password: String) {
 
         val uid = authRepo.currentUid() ?: return
@@ -42,9 +47,10 @@ class EditProfileViewModel : ViewModel() {
             email = email
         )
 
-        // שינוי מייל
+        // If email changed → update via Firebase Auth with verification
         if (email != currentUser.email) {
 
+            // Send verification email before updating
             authRepo.verifyAndUpdateEmail(email) { emailSuccess, _ ->
 
                 if (!emailSuccess) {
@@ -52,18 +58,18 @@ class EditProfileViewModel : ViewModel() {
                     return@verifyAndUpdateEmail
                 }
 
+                // Update Firestore after email update
                 userRepo.updateUser(updatedUser) {
                     _updateResult.postValue("EMAIL_CHANGED")
                 }
-
             }
-
             return
         }
 
-        // שינוי סיסמה בלבד
+        // If password entered → update password in Firebase
         if (password.isNotEmpty()) {
 
+            // Update password in Firebase Auth
             authRepo.updatePassword(password) { passSuccess, _ ->
 
                 if (!passSuccess) {
@@ -74,19 +80,15 @@ class EditProfileViewModel : ViewModel() {
                 userRepo.updateUser(updatedUser) {
                     _updateResult.postValue("PASSWORD_CHANGED")
                 }
-
             }
-
             return
         }
 
-        // שינוי שם בלבד
+        // Only name changed → update Firestore only
         userRepo.updateUser(updatedUser) {
             _updateResult.postValue("NAME_CHANGED")
         }
     }
-
-
 
     fun logout() {
         authRepo.logout()

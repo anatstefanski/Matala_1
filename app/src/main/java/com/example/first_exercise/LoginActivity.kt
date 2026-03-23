@@ -7,31 +7,33 @@ import android.widget.EditText
 import android.widget.Toast
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.first_exercise.MainActivity
-import com.example.first_exercise.R
 import com.google.android.material.button.MaterialButton
-import com.google.firebase.auth.FirebaseAuth
 import androidx.activity.viewModels
 import com.example.first_exercise.viewmodel.LoginState
 import com.example.first_exercise.viewmodel.LoginViewModel
 class LoginActivity : AppCompatActivity() {
-    private lateinit var onClickListener: () -> Unit
     private val vm: LoginViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        // זמני לבדיקה – מתנתק כל פעם שהמסך נפתח
-//        FirebaseAuth.getInstance().signOut()
         // Link to login XML
         setContentView(R.layout.activity_login)
 
-        // 1) If already logged in -> go directly to MainActivity
+        val emailInput = findViewById<EditText>(R.id.email_input)
+        val passwordInput = findViewById<EditText>(R.id.password_input)
+        val loginBtn = findViewById<MaterialButton>(R.id.login_btn)
+        val forgotPasswordText = findViewById<TextView>(R.id.forgot_password_text)
+        val goToRegister = findViewById<TextView>(R.id.go_to_register)
+
+        /**
+        * If already logged in-go directly to MainActivity
+        */
         if (vm.isLoggedIn()) {
             vm.checkAdminForExistingUser { isAdmin ->
-                val userId = vm.getCurrentUserId() ?: "" // שליפה דרך ה-VM
+                val userId = vm.getCurrentUserId() ?: ""
                 val intent = Intent(this, MainActivity::class.java).apply {
                     putExtra("IS_ADMIN", isAdmin)
-                    putExtra("USER_ID", userId) // העברה ל-Main
+                    putExtra("USER_ID", userId)
                 }
                 startActivity(intent)
                 finish()
@@ -39,66 +41,58 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        // 2) Observe login result from ViewModel
+        /**
+         *Observe login result from ViewModel
+         *Disable button during loading to prevent multiple clicks
+        */
         vm.loginState.observe(this) { state ->
             when (state) {
+                //Prevents double clicking
                 is LoginState.Loading -> {
-                    // Optional: disable button / show progress
+                    loginBtn.isEnabled = false
+                    loginBtn.alpha = 0.5f
                 }
+                //Successfully logged in
                 is LoginState.Success -> {
-                    Toast.makeText(this, "Logged in!", Toast.LENGTH_SHORT).show()
-                    val userId = vm.getCurrentUserId() ?: "" // שליפה דרך ה-VM
+                    loginBtn.isEnabled = true
+                    loginBtn.alpha = 1f
+                    Toast.makeText(this, "Logged in", Toast.LENGTH_SHORT).show()
+                    val userId = vm.getCurrentUserId() ?: ""
                     val intent = Intent(this, MainActivity::class.java).apply {
                         putExtra("IS_ADMIN", state.isAdmin)
-                        putExtra("USER_ID", userId) // העברה ל-Main
+                        putExtra("USER_ID", userId)
                     }
                     startActivity(intent)
                     finish()
                 }
                 is LoginState.Error -> {
+                    loginBtn.isEnabled = true
+                    loginBtn.alpha = 1f
                     Toast.makeText(this, state.message, Toast.LENGTH_SHORT).show()
                 }
             }
         }
 
-        // 3) Get Views (IDs match your XML: email_input, password_input)
-        val emailInput = findViewById<EditText>(R.id.email_input)
-        val passwordInput = findViewById<EditText>(R.id.password_input)
-        val loginBtn = findViewById<MaterialButton>(R.id.login_btn)
-        val forgotPasswordText = findViewById<TextView>(R.id.forgot_password_text)
-
+        /**
+        *If you forget your password, you can recover it by sending an email to reset your password.
+         */
         forgotPasswordText.setOnClickListener {
 
             val email = emailInput.text.toString().trim()
 
-            // בדיקה אם ריק
+            // Email field must be filled in.
             if (email.isEmpty()) {
                 Toast.makeText(this, "Enter your email first", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // בדיקה אם המייל תקין
+            // Check if the email is valid
             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 Toast.makeText(this, "Invalid email address", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // שליחת מייל לשינוי סיסמה
-//            FirebaseAuth.getInstance().sendPasswordResetEmail(email)
-//                .addOnSuccessListener {
-//                    Toast.makeText(
-//                        this,
-//                        "Password reset email sent",
-//                        Toast.LENGTH_LONG
-//                    ).show()
-//                }
-//                .addOnFailureListener {
-//                    Toast.makeText(
-//                        this,
-//                        "Failed to send reset email",
-//                        Toast.LENGTH_LONG
-//                    ).show()
-//                }
+            //Send an email to change your password
             vm.resetPassword(email) { success, error ->
                 if (success) {
                     Toast.makeText(this, "Password reset email sent", Toast.LENGTH_LONG).show()
@@ -108,7 +102,7 @@ class LoginActivity : AppCompatActivity() {
             }
         }
 
-        // 4) Click handler
+        //Click on login button
         loginBtn.setOnClickListener {
             val emailText = emailInput.text.toString().trim()
             val passwordText = passwordInput.text.toString().trim()
@@ -119,26 +113,28 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-// email format (basic)
+            // email format
             if (!android.util.Patterns.EMAIL_ADDRESS.matcher(emailText).matches()) {
                 Toast.makeText(this, "Invalid email address", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
 
-// password: EXACTLY 6 digits
+            // password: EXACTLY 6 digits
             if (passwordText.length != 6 || !passwordText.all { it.isDigit() }) {
                 Toast.makeText(this, "Password must be exactly 6 digits", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
 
-            // Call ViewModel (which calls Repository -> Firebase)
             vm.login(emailText, passwordText)
             }
 
-        val goToRegister = findViewById<TextView>(R.id.go_to_register)
 
+        /**
+        *If not registered in the app – clicking "Register"
+        navigates to the registration screen.
+         */
         goToRegister.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
         }

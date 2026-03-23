@@ -9,13 +9,19 @@ import com.example.first_exercise.repository.UserRepository
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 
 class RegisterViewModel : ViewModel() {
-
+    // Connection to Firebase
     private val authRepo = AuthRepository()
     private val userRepo = UserRepository()
 
     private val _registerState = MutableLiveData<RegisterState>()
     val registerState: LiveData<RegisterState> = _registerState
 
+    /**
+     * Registers a new user
+     * 1. Creates user in Firebase Authentication
+     * 2. Saves user data in Firestore
+     * 3. Updates UI state (Loading / Success / Error)
+     */
     fun register(fullName: String, email: String, password: String) {
         _registerState.value = RegisterState.Loading
 
@@ -39,15 +45,20 @@ class RegisterViewModel : ViewModel() {
             res.onFailure { e ->
                 val msg = if (e is FirebaseAuthUserCollisionException) {
                     "This email is already registered. Please log in."
+                }else if (e.message?.contains("network", true) == true) {
+                    "No internet connection"
                 } else {
                     "Register failed: ${e.message}"
                 }
-                _registerState.postValue(RegisterState.Error(msg))
+                _registerState.postValue(RegisterState.Success)
             }
         }
     }
 }
 
+/**
+ * Represents registration state for the UI
+ */
 sealed class RegisterState {
     data object Loading : RegisterState()
     data object Success : RegisterState()

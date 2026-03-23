@@ -4,16 +4,31 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class AuthRepository(
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
-    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance(), //Authentication
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance() //Database
 ) {
 
+
+    /**
+     * Logs in a user using Firebase Authentication.
+     *
+     * @param email User email
+     * @param password User password
+     * @param onResult Returns (success, errorMessage)
+     */
     fun login(email: String, password: String, onResult: (Boolean, String?) -> Unit) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnSuccessListener { onResult(true, null) }
             .addOnFailureListener { onResult(false, it.message ?: "Login failed") }
     }
 
+    /**
+     * Registers a new user in Firebase.
+     *
+     * @param email User email
+     * @param password User password
+     * @param onResult Returns Result<uid> on success or failure
+     */
     fun register(email: String, password: String, onResult: (Result<String>) -> Unit) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnSuccessListener { res ->
@@ -28,6 +43,12 @@ class AuthRepository(
 
     fun currentUid(): String? = auth.currentUser?.uid
 
+    /**
+     * Retrieves user role from Firestore.
+     *
+     * @param uid User ID
+     * @param onResult Returns true if admin, otherwise false
+     */
     fun fetchIsAdmin(uid: String, onResult: (Boolean) -> Unit) {
         db.collection("users").document(uid).get()
             .addOnSuccessListener { doc ->
@@ -38,20 +59,27 @@ class AuthRepository(
                 onResult(false)
             }
     }
-    fun updateEmail(newEmail: String, onResult: (Boolean, String?) -> Unit) {
 
-        val user = auth.currentUser
+//    fun updateEmail(newEmail: String, onResult: (Boolean, String?) -> Unit) {
+//
+//        val user = auth.currentUser
+//
+//        user?.updateEmail(newEmail)
+//            ?.addOnSuccessListener {
+//                onResult(true, null)
+//            }
+//            ?.addOnFailureListener {
+//                onResult(false, it.message)
+//            }
+//
+//    }
 
-        user?.updateEmail(newEmail)
-            ?.addOnSuccessListener {
-                onResult(true, null)
-            }
-            ?.addOnFailureListener {
-                onResult(false, it.message)
-            }
-
-    }
-
+    /**
+     * Updates the password of the current user.
+     *
+     * @param newPassword New password
+     * @param onResult Returns (success, errorMessage)
+     */
     fun updatePassword(newPassword: String, onResult: (Boolean, String?) -> Unit) {
 
         val user = auth.currentUser
@@ -66,35 +94,42 @@ class AuthRepository(
 
     }
 
-    fun reauthenticateAndUpdateEmail(
-        currentEmail: String,
-        password: String,
-        newEmail: String,
-        onResult: (Boolean, String?) -> Unit
-    ) {
+//    fun reauthenticateAndUpdateEmail(
+//        currentEmail: String,
+//        password: String,
+//        newEmail: String,
+//        onResult: (Boolean, String?) -> Unit
+//    ) {
+//
+//        val user = auth.currentUser ?: return
+//
+//        val credential =
+//            com.google.firebase.auth.EmailAuthProvider
+//                .getCredential(currentEmail, password)
+//
+//        user.reauthenticate(credential)
+//            .addOnSuccessListener {
+//
+//                user.updateEmail(newEmail)
+//                    .addOnSuccessListener {
+//                        onResult(true, null)
+//                    }
+//                    .addOnFailureListener {
+//                        onResult(false, it.message)
+//                    }
+//
+//            }
+//            .addOnFailureListener {
+//                onResult(false, it.message)
+//            }
+//    }
 
-        val user = auth.currentUser ?: return
-
-        val credential =
-            com.google.firebase.auth.EmailAuthProvider
-                .getCredential(currentEmail, password)
-
-        user.reauthenticate(credential)
-            .addOnSuccessListener {
-
-                user.updateEmail(newEmail)
-                    .addOnSuccessListener {
-                        onResult(true, null)
-                    }
-                    .addOnFailureListener {
-                        onResult(false, it.message)
-                    }
-
-            }
-            .addOnFailureListener {
-                onResult(false, it.message)
-            }
-    }
+    /**
+     * Sends verification before updating email.
+     *
+     * @param newEmail New email
+     * @param onResult Returns (success, errorMessage)
+     */
     fun verifyAndUpdateEmail(newEmail: String, onResult: (Boolean, String?) -> Unit) {
 
         val user = auth.currentUser
@@ -109,6 +144,12 @@ class AuthRepository(
 
     }
 
+    /**
+     * Sends a password reset email.
+     *
+     * @param email User email
+     * @param onResult Returns (success, errorMessage)
+     */
     fun resetPassword(email: String, onResult: (Boolean, String?) -> Unit) {
 
         auth.sendPasswordResetEmail(email)
@@ -123,6 +164,12 @@ class AuthRepository(
         auth.signOut()
     }
 
+    /**
+     * Retrieves user's name from Firestore.
+     *
+     * @param uid User ID
+     * @param onResult Returns user name
+     */
     fun getUserName(uid: String, onResult: (String) -> Unit) {
         db.collection("users").document(uid).get()
             .addOnSuccessListener { doc ->

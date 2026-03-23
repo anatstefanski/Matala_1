@@ -7,34 +7,43 @@ import com.example.first_exercise.repository.AuthRepository
 
 class LoginViewModel : ViewModel() {
 
+    // Connection to Firebase
     private val repo = AuthRepository()
 
     private val _loginState = MutableLiveData<LoginState>()
     val loginState: LiveData<LoginState> = _loginState
 
+    /**
+     * Performs user login via Firebase and updates login state for the UI.
+     *
+     * @param email User email
+     * @param password User password
+     */
     fun login(email: String, password: String) {
         _loginState.value = LoginState.Loading
 
         repo.login(email, password) { success, error ->
 
+            // Handle login errors based on error type
             if (!success) {
 
-                // אם המייל או הסיסמה לא נכונים
-                if (error?.contains("password", true) == true ||
+                // No internet
+                if (error?.contains("network", true) == true) {
+                    _loginState.postValue(LoginState.Error("No internet connection"))
+                } else if (
+                    error?.contains("password", true) == true ||
                     error?.contains("credential", true) == true ||
-                    error?.contains("user", true) == true) {
-
+                    error?.contains("user", true) == true
+                ) {
                     _loginState.postValue(LoginState.Error("Email or password is incorrect"))
-
                 } else {
-
                     _loginState.postValue(LoginState.Error("Login failed"))
-
                 }
 
                 return@login
             }
 
+            //Succeeded
             val uid = repo.currentUid()
             if (uid == null) {
                 _loginState.postValue(LoginState.Error("Missing user uid"))
@@ -68,7 +77,9 @@ class LoginViewModel : ViewModel() {
     }
 
 }
-
+/**
+*Possible login states
+ */
 sealed class LoginState {
     data object Loading : LoginState()
     data class Success(val isAdmin: Boolean) : LoginState()
