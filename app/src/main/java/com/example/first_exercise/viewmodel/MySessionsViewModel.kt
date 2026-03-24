@@ -60,14 +60,24 @@ class MySessionsViewModel : ViewModel() {
 
                 val courseIds = sessionList.map { it.courseId }.distinct()
 
-                courseRepo.getCoursesByIds(courseIds) { courses ->
+                courseRepo.getCoursesByIds(courseIds) { courses, error ->
 
-                    val courseIdToCategory = courses.associate { it.courseId to it.category }
+                    // 🔴 טיפול בשגיאה
+                    if (error != null) {
+                        // אפשר להוסיף LiveData של error אם תרצי
+                        return@getCoursesByIds
+                    }
+
+                    val safeCourses = courses ?: emptyList()
+
+                    val courseIdToCategory =
+                        safeCourses.associate { it.courseId to it.category }
 
                     val counts = defaultCounts.toMutableMap()
 
                     sessionList.forEach { session ->
                         val category = courseIdToCategory[session.courseId]
+
                         if (category != null && counts.containsKey(category)) {
                             counts[category] = counts[category]!! + 1
                         }
@@ -75,7 +85,6 @@ class MySessionsViewModel : ViewModel() {
 
                     sessions.postValue(sessionList)
                     categoryCounts.postValue(counts)
-
                 }
             }
         }

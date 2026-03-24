@@ -6,14 +6,23 @@ import android.widget.EditText
 import android.widget.Spinner
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.example.first_exercise.R
 import com.example.first_exercise.viewmodel.AdminViewModel
 import com.google.android.material.button.MaterialButton
 import android.widget.Toast
 import com.example.first_exercise.model.CourseItem
 
+/**
+ * AdminActivity - screen for adding a new course.
+ *
+ * This screen allows the admin to:
+ * - enter course title
+ * - enter description
+ * - provide image URL
+ * - select category
+ *
+ * Performs validation before sending data to Firebase.
+ */
 class AdminActivity : AppCompatActivity() {
-
     private val vm: AdminViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +36,7 @@ class AdminActivity : AppCompatActivity() {
         val btnSave: MaterialButton = findViewById(R.id.btnSave)
 
         val categories = listOf(
-            "all",
+            "Select Category",
             "Computer Science",
             "Education",
             "Economics",
@@ -73,7 +82,12 @@ class AdminActivity : AppCompatActivity() {
                 imageUrl = imageUrl
             )
 
+            btnSave.isEnabled = false
+            btnSave.alpha = 0.5f
+
             vm.saveCourse(course) { success ->
+                btnSave.isEnabled = true
+                btnSave.alpha = 1f
                 if (success) {
                     Toast.makeText(this, "Course saved!", Toast.LENGTH_SHORT).show()
                     finish()

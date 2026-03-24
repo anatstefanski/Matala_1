@@ -8,11 +8,15 @@ class CourseRepository {
 
     private val firestore = FirebaseFirestore.getInstance()
     private val coursesRef = firestore.collection("courses")
-
     private val pageSize = 10
     private var lastVisible: DocumentSnapshot? = null
 
-    fun getFirstCourses(onResult: (List<CourseItem>) -> Unit) {
+    /**
+     * Fetches the first page of courses from Firebase.
+     * Returns list of courses or an error message.
+     */
+    fun getFirstCourses(onResult: (List<CourseItem>?, String?) -> Unit) {
+
         coursesRef
             .orderBy("title")
             .limit(pageSize.toLong())
@@ -20,20 +24,25 @@ class CourseRepository {
             .addOnSuccessListener { snapshot ->
 
                 if (!snapshot.isEmpty) {
-                    lastVisible = snapshot.documents[snapshot.size() - 1]
+                    lastVisible = snapshot.documents.last()
                 }
 
                 val courses = snapshot.toObjects(CourseItem::class.java)
-                onResult(courses)
+
+                onResult(courses, null)
             }
-            .addOnFailureListener {
-                onResult(emptyList())
+            .addOnFailureListener { e ->
+                onResult(null, e.message)
             }
     }
 
-    fun getMoreCourses(onResult: (List<CourseItem>) -> Unit) {
+    /**
+     * Fetches next page of courses for pagination.
+     */
+    fun getMoreCourses(onResult: (List<CourseItem>?, String?) -> Unit) {
+
         val last = lastVisible ?: run {
-            onResult(emptyList())
+            onResult(emptyList(), null)
             return
         }
 
@@ -45,17 +54,21 @@ class CourseRepository {
             .addOnSuccessListener { snapshot ->
 
                 if (!snapshot.isEmpty) {
-                    lastVisible = snapshot.documents[snapshot.size() - 1]
+                    lastVisible = snapshot.documents.last()
                 }
 
                 val courses = snapshot.toObjects(CourseItem::class.java)
-                onResult(courses)
+
+                onResult(courses, null)
             }
-            .addOnFailureListener {
-                onResult(emptyList())
+            .addOnFailureListener { e ->
+                onResult(null, e.message)
             }
     }
 
+    /**
+     * Adds a new course to Firestore.
+     */
     fun addCourse(course: CourseItem, onComplete: (Boolean) -> Unit) {
         val courseId = coursesRef.document().id
         val courseWithId = course.copy(courseId = courseId)
@@ -65,9 +78,13 @@ class CourseRepository {
             .addOnCompleteListener { onComplete(it.isSuccessful) }
     }
 
-    fun getCoursesByIds(ids: List<String>, onResult: (List<CourseItem>) -> Unit) {
+    /**
+     * Fetches courses by their IDs.
+     */
+    fun getCoursesByIds(ids: List<String>, onResult: (List<CourseItem>?, String?) -> Unit) {
+
         if (ids.isEmpty()) {
-            onResult(emptyList())
+            onResult(emptyList(), null)
             return
         }
 
@@ -76,10 +93,10 @@ class CourseRepository {
             .get()
             .addOnSuccessListener {
                 val courses = it.toObjects(CourseItem::class.java)
-                onResult(courses)
+                onResult(courses, null)
             }
-            .addOnFailureListener {
-                onResult(emptyList())
+            .addOnFailureListener { e ->
+                onResult(null, e.message)
             }
     }
 }

@@ -9,34 +9,44 @@ import com.example.first_exercise.repository.ChatRepository
 import com.example.first_exercise.repository.CourseRepository
 
 class CourseViewModel : ViewModel() {
-
+    // Connection to Firebase
     private val repo = CourseRepository()
     private val chatRepo = ChatRepository()
     private val attendanceRepo = AttendanceRepository()
     private val _totalUnreadCount = MutableLiveData<Int>()
     val totalUnreadCount: LiveData<Int> = _totalUnreadCount
-
     private val _allCourses = MutableLiveData<MutableList<CourseItem>>(mutableListOf())
     private val _filteredCourses = MutableLiveData<List<CourseItem>>()
     val filteredCourses: LiveData<List<CourseItem>> = _filteredCourses
-
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
-
     private var currentSearchQuery: String = ""
     private var currentSelectedCategories: Set<String> = setOf("All")
+    private val _error = MutableLiveData<String>()
+    val error: LiveData<String> = _error
+
+    private val _hasMore = MutableLiveData<Boolean>(true)
+    val hasMore: LiveData<Boolean> = _hasMore
 
     init {
         loadFirstCourses()
     }
-
+    /**
+     * Loads the first page of courses from Firebase.
+     */
     fun loadFirstCourses() {
 
         _isLoading.value = true
 
-        repo.getFirstCourses { courses ->
+        repo.getFirstCourses { courses, error ->
 
-            _allCourses.value = courses.toMutableList()
+            if (error != null) {
+                _error.postValue("Failed to load courses")
+                _isLoading.postValue(false)
+                return@getFirstCourses
+            }
+
+            _allCourses.value = courses?.toMutableList() ?: mutableListOf()
 
             _isLoading.postValue(false)
 
@@ -44,13 +54,28 @@ class CourseViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Loads additional courses for pagination.
+     */
     fun loadMoreCourses() {
 
-        repo.getMoreCourses { moreCourses ->
+        repo.getMoreCourses { moreCourses, error ->
+
+            if (error != null) {
+                _error.postValue("Failed to load more courses")
+                return@getMoreCourses
+            }
+
+            val safeCourses = moreCourses ?: emptyList()
+
+            if (safeCourses.isEmpty()) {
+                _hasMore.postValue(false)
+                return@getMoreCourses
+            }
 
             val currentList = _allCourses.value ?: mutableListOf()
 
-            currentList.addAll(moreCourses)
+            currentList.addAll(safeCourses)
 
             _allCourses.postValue(currentList)
 
@@ -58,6 +83,9 @@ class CourseViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Updates search query and category filters.
+     */
     fun updateSearchAndFilter(query: String? = null, categories: Set<String>? = null) {
 
         query?.let { currentSearchQuery = it }
@@ -66,6 +94,9 @@ class CourseViewModel : ViewModel() {
         applySearchAndFilter()
     }
 
+    /**
+     * Applies filtering logic on the course list based on search and categories.
+     */
     private fun applySearchAndFilter() {
 
         var filtered = _allCourses.value ?: emptyList()
@@ -86,6 +117,10 @@ class CourseViewModel : ViewModel() {
 
         _filteredCourses.value = filtered
     }
+
+    /**
+     * Calculates total unread messages for all sessions the user is enrolled in.
+     */
     fun loadTotalUnreadCount(userId: String) {
         attendanceRepo.getUserAttendances(userId) { attendanceList ->
             val sessionIds = attendanceList.map { it.sessionId }

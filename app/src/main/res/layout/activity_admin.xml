@@ -71,22 +71,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-<!--    <EditText-->
-<!--        android:id="@+id/etVideoUrl"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_height="50dp"-->
-<!--        android:layout_marginTop="16dp"-->
-<!--        android:layout_marginStart="32dp"-->
-<!--        android:layout_marginEnd="32dp"-->
-<!--        android:background="@drawable/text_box"-->
-<!--        android:hint="Video URL"-->
-<!--        android:padding="14dp"-->
-<!--        android:textColor="@color/black"-->
-<!--        android:inputType="textUri"-->
-<!--        app:layout_constraintTop_toBottomOf="@id/etImageUrl"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"/>-->
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
