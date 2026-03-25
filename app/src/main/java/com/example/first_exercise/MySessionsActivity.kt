@@ -18,10 +18,16 @@ import com.github.mikephil.charting.formatter.ValueFormatter
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.ForegroundColorSpan
+/**
+ * Displays all sessions the user is registered to.
+ * Includes:
+ * - List of sessions
+ * - Category statistics (Pie Chart)
+ * - Navigation to chat per session
+ */
 class MySessionsActivity : AppCompatActivity() {
 
     private val vm: MySessionsViewModel by viewModels()
-
     private lateinit var rv: RecyclerView
     private lateinit var pieChart: PieChart
     private lateinit var emptyText: TextView
@@ -32,7 +38,10 @@ class MySessionsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_my_sessions)
-        userId=intent.getStringExtra("USER_ID") ?: ""
+        userId = intent.getStringExtra("USER_ID") ?: run {
+            finish()
+            return
+        }
 
         rv = findViewById(R.id.MySessions)
         pieChart = findViewById(R.id.pieChart)
@@ -41,7 +50,6 @@ class MySessionsActivity : AppCompatActivity() {
 
         rv.layoutManager = LinearLayoutManager(this)
         vm.unreadCounts.observe(this) { countsMap ->
-            // עדכון ה-Adapter עם המפה החדשה של המונים
             adapter.updateUnreadCounts(countsMap)
         }
         adapter = SessionAdapter(
@@ -49,6 +57,7 @@ class MySessionsActivity : AppCompatActivity() {
             isAdmin = false,
             onRegClick = { _, _ -> },
             onLocClick = { },
+            // When user clicks a session → open chat screen
             onSessionClick = { session ->
                 val intent = Intent(this, ChatActivity::class.java).apply {
                     putExtra("USER_ID", userId)
@@ -63,10 +72,9 @@ class MySessionsActivity : AppCompatActivity() {
 
         vm.sessions.observe(this) { list ->
             adapter.submitList(list)
-
             emptyText.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
         }
-
+        // Observe category statistics and update chart + summary
         vm.categoryCounts.observe(this) { counts ->
             showDonutChart(counts, pieChart)
             summaryText.text = buildSummaryText(counts)
@@ -79,6 +87,11 @@ class MySessionsActivity : AppCompatActivity() {
         super.onResume()
         vm.loadMySessions()
     }
+
+    /**
+     * Displays category distribution using Pie Chart
+     * Each slice represents number of sessions per category
+     */
     private fun showDonutChart(counts: Map<String, Int>, chart: PieChart) {
         val orderedCategories = listOf(
             "Computer Science",
@@ -89,8 +102,6 @@ class MySessionsActivity : AppCompatActivity() {
 
         val entries = orderedCategories.map { category ->
             val realValue = counts[category] ?: 0
-
-            // כדי שהצבע תמיד יופיע גם אם הערך הוא 0
             val renderValue = if (realValue == 0) 0.001f else realValue.toFloat()
 
             PieEntry(renderValue, category, realValue)
@@ -111,13 +122,6 @@ class MySessionsActivity : AppCompatActivity() {
         }
 
         val data = PieData(dataSet)
-//        data.setValueFormatter(object : ValueFormatter() {
-//            override fun getPieLabel(value: Float, pieEntry: PieEntry?): String {
-//                val category = pieEntry?.label ?: ""
-//                val realCount = (pieEntry?.data as? Int) ?: 0
-//                return "$category\n$realCount"
-//            }
-//        })
         data.setValueFormatter(object : ValueFormatter() {
             override fun getPieLabel(value: Float, pieEntry: PieEntry?): String {
                 val category = pieEntry?.label ?: ""
@@ -148,82 +152,55 @@ class MySessionsActivity : AppCompatActivity() {
         chart.rotationAngle = 0f
         chart.isRotationEnabled = true
         chart.animateY(1000)
-
-//        chart.legend.apply {
-//            isEnabled = true
-//            textSize = 13f
-//            form = Legend.LegendForm.CIRCLE
-//            verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
-//            horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
-//            orientation = Legend.LegendOrientation.HORIZONTAL
-//            setDrawInside(false)
-//        }
-//        chart.legend.apply {
-//            isEnabled = true
-//            textSize = 10f
-//            form = Legend.LegendForm.CIRCLE
-//            formSize = 8f
-//            xEntrySpace = 8f
-//            yEntrySpace = 0f
-//            verticalAlignment = Legend.LegendVerticalAlignment.TOP
-//            horizontalAlignment = Legend.LegendHorizontalAlignment.CENTER
-//            orientation = Legend.LegendOrientation.HORIZONTAL
-//            setDrawInside(false)
-//        }
         chart.legend.isEnabled = false
         chart.invalidate()
     }
 
-//    private fun buildSummaryText(counts: Map<String, Int>): String {
-//        val computerScience = counts["Computer Science"] ?: 0
-//        val education = counts["Education"] ?: 0
-//        val economics = counts["Economics"] ?: 0
-//        val behavioralSciences = counts["Behavioral Sciences"] ?: 0
-//
-//        return "Computer Science: $computerScience   |   " +
-//                "Education: $education   |   " +
-//                "Economics: $economics   |   " +
-//                "Behavioral Sciences: $behavioralSciences"
-//    }
-private fun buildSummaryText(counts: Map<String, Int>): SpannableStringBuilder {
-    val computerScience = counts["Computer Science"] ?: 0
-    val education = counts["Education"] ?: 0
-    val economics = counts["Economics"] ?: 0
-    val behavioralSciences = counts["Behavioral Sciences"] ?: 0
+    /**
+     * Displays category distribution using Pie Chart
+     * Each slice represents number of sessions per category
+     */
+    private fun buildSummaryText(counts: Map<String, Int>): SpannableStringBuilder {
+        val computerScience = counts["Computer Science"] ?: 0
+        val education = counts["Education"] ?: 0
+        val economics = counts["Economics"] ?: 0
+        val behavioralSciences = counts["Behavioral Sciences"] ?: 0
 
-    val builder = SpannableStringBuilder()
+        val builder = SpannableStringBuilder()
 
-    appendColoredPrefix(
-        builder,
-        "● ",
-        Color.parseColor("#8BC34A")
-    )
-    builder.append("Computer Science: $computerScience   |   ")
+        appendColoredPrefix(
+            builder,
+            "● ",
+            Color.parseColor("#8BC34A")
+        )
+            builder.append("Computer Science: $computerScience   |   ")
 
-    appendColoredPrefix(
-        builder,
-        "● ",
-        Color.parseColor("#C8E96A")
-    )
-    builder.append("Education: $education   |   ")
+             appendColoredPrefix(
+                builder,
+                "● ",
+                Color.parseColor("#C8E96A")
+        )
+          builder.append("Education: $education   |   ")
 
-    appendColoredPrefix(
-        builder,
-        "● ",
-        Color.parseColor("#E9D26A")
-    )
-    builder.append("Economics: $economics   |   ")
+        appendColoredPrefix(
+            builder,
+            "● ",
+            Color.parseColor("#E9D26A")
+        )
+        builder.append("Economics: $economics   |   ")
 
-    appendColoredPrefix(
-        builder,
-        "● ",
-        Color.parseColor("#7FD3E8")
-    )
-    builder.append("Behavioral Sciences: $behavioralSciences")
+        appendColoredPrefix(
+            builder,
+            "● ",
+            Color.parseColor("#7FD3E8")
+        )
+        builder.append("Behavioral Sciences: $behavioralSciences")
 
-    return builder
+        return builder
 }
-
+    /**
+     * Adds a colored dot (●) before each category name
+     */
     private fun appendColoredPrefix(
         builder: SpannableStringBuilder,
         text: String,

@@ -36,6 +36,7 @@ class RegisterViewModel : ViewModel() {
 
                 userRepo.createUser(appUser) { saveRes ->
                     saveRes.onSuccess {
+                        authRepo.logout()
                         _registerState.value = RegisterState.Success
                     }.onFailure { e ->
                         _registerState.postValue(RegisterState.Error("Failed saving profile: ${e.message}"))
@@ -50,7 +51,7 @@ class RegisterViewModel : ViewModel() {
                 } else {
                     "Register failed: ${e.message}"
                 }
-                _registerState.postValue(RegisterState.Success)
+                _registerState.postValue(RegisterState.Error(msg))
             }
         }
     }

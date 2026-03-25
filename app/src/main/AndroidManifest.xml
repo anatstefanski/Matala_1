@@ -30,7 +30,8 @@
             android:name=".MySessionsActivity"
             android:exported="false" />
         <activity
-            android:name=".ChatActivity" />
+            android:name=".ChatActivity"
+            android:windowSoftInputMode="adjustResize"/>
         <activity
             android:name=".LoginActivity"
             android:exported="true">

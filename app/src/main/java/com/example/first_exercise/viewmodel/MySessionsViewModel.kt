@@ -16,15 +16,14 @@ class MySessionsViewModel : ViewModel() {
     private val sessionRepo = SessionRepository()
     private val courseRepo = CourseRepository()
     private val auth = FirebaseAuth.getInstance()
-
     private val chatRepo = ChatRepository()
+    val error = MutableLiveData<String>()
     private val _unreadCounts = MutableLiveData<Map<String, Int>>()
-
     val unreadCounts: LiveData<Map<String, Int>> = _unreadCounts
-
     val sessions = MutableLiveData<List<StudySession>>()
     val categoryCounts = MutableLiveData<Map<String, Int>>()
 
+    // Default categories with zero values (used when no data exists)
     private val defaultCounts = linkedMapOf(
         "Computer Science" to 0,
         "Education" to 0,
@@ -32,6 +31,10 @@ class MySessionsViewModel : ViewModel() {
         "Behavioral Sciences" to 0
     )
 
+    /**
+     * Loads user sessions, calculates categories
+     * and updates unread messages.
+     */
     fun loadMySessions() {
         val userId = auth.currentUser?.uid ?: run {
             sessions.postValue(emptyList())
@@ -41,6 +44,7 @@ class MySessionsViewModel : ViewModel() {
 
         attendanceRepo.getUserAttendances(userId) { attendanceList ->
 
+            // If user has no sessions → show empty UI
             if (attendanceList.isEmpty()) {
                 sessions.postValue(emptyList())
                 categoryCounts.postValue(defaultCounts)
@@ -61,18 +65,14 @@ class MySessionsViewModel : ViewModel() {
                 val courseIds = sessionList.map { it.courseId }.distinct()
 
                 courseRepo.getCoursesByIds(courseIds) { courses, error ->
-
-                    // 🔴 טיפול בשגיאה
                     if (error != null) {
-                        // אפשר להוסיף LiveData של error אם תרצי
+                        this.error.postValue("Failed to load courses")
                         return@getCoursesByIds
                     }
-
                     val safeCourses = courses ?: emptyList()
-
+                    // Map courseId → category
                     val courseIdToCategory =
                         safeCourses.associate { it.courseId to it.category }
-
                     val counts = defaultCounts.toMutableMap()
 
                     sessionList.forEach { session ->
@@ -82,7 +82,6 @@ class MySessionsViewModel : ViewModel() {
                             counts[category] = counts[category]!! + 1
                         }
                     }
-
                     sessions.postValue(sessionList)
                     categoryCounts.postValue(counts)
                 }
@@ -90,7 +89,13 @@ class MySessionsViewModel : ViewModel() {
         }
     }
 
-
+    /**
+     * Calculates unread messages per session.
+     *
+     * Logic:
+     * - For each session → fetch unread count from ChatRepository
+     * - Aggregate results into a map
+     */
     fun loadUnreadCounts(userId: String, sessions: List<StudySession>) {
         val counts = mutableMapOf<String, Int>()
         var processed = 0

@@ -57,7 +57,9 @@
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/tvCategorySummary"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/MySessions"
@@ -68,6 +70,7 @@
         android:layout_marginEnd="12dp"
         android:clipToPadding="false"
         android:paddingBottom="16dp"
+        android:overScrollMode="never"
         app:layout_constraintTop_toBottomOf="@id/tvCategorySummary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

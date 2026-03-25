@@ -7,14 +7,22 @@ import androidx.lifecycle.ViewModel
 import com.example.first_exercise.model.ChatMessage
 import com.example.first_exercise.repository.AuthRepository
 import com.example.first_exercise.repository.ChatRepository
+/**
+ * Responsible for:
+ * Sending messages
+ * Loading real-time messages
+ * Marking messages as read
+ */
 class ChatViewModel(private val repo: ChatRepository = ChatRepository()) : ViewModel() {
     private val authRepo = AuthRepository()
     private val _messages = MutableLiveData<List<ChatMessage>>()
     val messages: LiveData<List<ChatMessage>> = _messages
-    // ChatViewModel.kt
 
-
-    fun sendMessageWithUserName(sessionId: String, userId: String, text: String) {
+    /**
+     * Sends a message with the user's name.
+     * First fetches the name, then sends the message.
+     */
+    fun sendMessageWithUserName(sessionId: String, userId: String, text: String,onResult: (Boolean) -> Unit) {
         authRepo.getUserName(userId) { name ->
             val newMessage = ChatMessage(
                 senderId = userId,
@@ -22,12 +30,20 @@ class ChatViewModel(private val repo: ChatRepository = ChatRepository()) : ViewM
                 text = text,
                 timestamp = System.currentTimeMillis()
             )
-            sendMessage(sessionId, newMessage)
+            sendMessage(sessionId, newMessage, onResult)
         }
     }
-    fun sendMessage(sessionId: String, message: ChatMessage) {
+
+    /**
+     * Sends message to Firebase via repository
+     */
+    fun sendMessage(sessionId: String, message: ChatMessage, onResult: (Boolean) -> Unit) {
         repo.sendMessage(sessionId, message) { success ->
-            if (!success) Log.e("ChatViewModel", "Failed to send message")
+
+            if (!success) {
+                Log.e("ChatViewModel", "Failed to send message")
+            }
+            onResult(success)
         }
     }
 

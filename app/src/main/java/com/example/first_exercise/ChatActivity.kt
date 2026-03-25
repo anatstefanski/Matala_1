@@ -3,14 +3,17 @@ package com.example.first_exercise
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.first_exercise.model.ChatMessage
 import com.example.first_exercise.viewmodel.ChatViewModel
-import com.google.firebase.auth.FirebaseAuth
-// ChatActivity.kt
+
+/**
+ * Chat screen.
+ * Displays messages and allows sending new messages.
+ */
 class ChatActivity : AppCompatActivity() {
     private val viewModel: ChatViewModel by viewModels()
     private lateinit var sessionId: String
@@ -30,22 +33,31 @@ class ChatActivity : AppCompatActivity() {
 
         viewModel.messages.observe(this) { list ->
             adapter.submitList(list)
-            rv.scrollToPosition(list.size - 1) // גלילה לסוף בהודעה חדשה
+            rv.scrollToPosition(list.size - 1)
         }
         val etMessage = findViewById<EditText>(R.id.etMessage)
         val btnSend = findViewById<Button>(R.id.btnSend)
 
         viewModel.observeMessages(sessionId)
 
+        //send button
         btnSend.setOnClickListener {
             val text = etMessage.text.toString()
-            if (text.isNotBlank()) {
-                viewModel.sendMessageWithUserName(sessionId, userId, text)
-                etMessage.text.clear()
+            if (text.isBlank()) {
+                Toast.makeText(this, "Message cannot be empty", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            viewModel.sendMessageWithUserName(sessionId, userId, text) { success ->
+                if (success) {
+                    etMessage.text.clear()
+                } else {
+                    Toast.makeText(this, "No internet connection", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
-        // סימון כנקרא בכניסה
+        // Mark messages as read when entering chat
         viewModel.markChatAsRead(userId, sessionId)
     }
 }

@@ -12,15 +12,25 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+/**
+ * Adapter for displaying chat messages in RecyclerView.
+ * Responsible for showing messages on left/right depending on sender.
+ */
 class ChatAdapter(private val userId: String) : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
 
     private var messages: List<ChatMessage> = emptyList()
 
+    /**
+     *Updates the list of messages and refreshes UI
+     */
     fun submitList(list: List<ChatMessage>) {
         messages = list
         notifyDataSetChanged()
     }
 
+    /**
+     * Creates a new message view (bubble)
+     */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_chat_message, parent, false)
@@ -41,6 +51,7 @@ class ChatAdapter(private val userId: String) : RecyclerView.Adapter<ChatAdapter
             val container = itemView.findViewById<LinearLayout>(R.id.messageContainer)
             val bubble = itemView.findViewById<LinearLayout>(R.id.messageBubble)
 
+            // Sets message text and time
             tvMsg.text = msg.text
             tvTime.text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(msg.timestamp))
 
