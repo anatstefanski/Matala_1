@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.first_exercise.model.StudySession
 import com.example.first_exercise.viewmodel.SessionEditViewModel
+//Uses Google Play Services Location API to retrieve the user’s location
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.button.MaterialButton
 import java.text.SimpleDateFormat
@@ -28,13 +29,14 @@ import android.text.TextWatcher
 class EditSessionActivity : AppCompatActivity() {
 
     private val vm: SessionEditViewModel by viewModels()
-
     private var courseId: String? = null
     private var courseName: String? = null
-
+    //save GPS
     private var selectedLat: Double? = null
     private var selectedLon: Double? = null
+    //Address from API
     private var selectedAddress: String = ""
+    //Source of the location: "current" → GPS ,"manual" → API
     private var locationSource: String = ""
 
     companion object {
@@ -43,6 +45,7 @@ class EditSessionActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Link to login XML
         setContentView(R.layout.activity_edit_session)
 
         val etTopic: EditText = findViewById(R.id.etTopic)
@@ -57,13 +60,16 @@ class EditSessionActivity : AppCompatActivity() {
         courseId = intent.getStringExtra("COURSE_ID")
         courseName = intent.getStringExtra("COURSE_NAME")
 
+        //Date button - opens DatePicker
         etDate.setOnClickListener {
             showDatePicker(etDate)
         }
-
+        //Time button
         etTime.setOnClickListener {
             showTimePicker(etTime)
         }
+
+        //Clicking the search icon searches for the address
         etManualLocation.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
                 val drawableStart = 0
@@ -79,15 +85,15 @@ class EditSessionActivity : AppCompatActivity() {
             }
             false
         }
-
-        etManualLocation.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                searchManualLocation(etManualLocation, tvSelectedLocation)
-                true
-            } else {
-                false
-            }
-        }
+//
+//        etManualLocation.setOnEditorActionListener { _, actionId, _ ->
+//            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+//                searchManualLocation(etManualLocation, tvSelectedLocation)
+//                true
+//            } else {
+//                false
+//            }
+//        }
 
         etManualLocation.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -103,15 +109,16 @@ class EditSessionActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {}
         })
 
+        //GPS button
         btnUseCurrentLocation.setOnClickListener {
             getCurrentLocation(tvSelectedLocation)
         }
 
+        //Save Session button – including validations
         btnSave.setOnClickListener {
             val topic = etTopic.text.toString().trim()
             val date = etDate.text.toString().trim()
             val time = etTime.text.toString().trim()
-            val manualLocation = etManualLocation.text.toString().trim()
             val zoomUrl = etZoomUrl.text.toString().trim().ifEmpty { null }
 
             if (topic.isEmpty()) {
@@ -144,24 +151,6 @@ class EditSessionActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-//            if (manualLocation.isNotEmpty()) {
-//                vm.searchLocationByQuery(
-//                    query = manualLocation,
-//                    onSuccess = { lat, lon, address ->
-//                        selectedLat = lat
-//                        selectedLon = lon
-//                        selectedAddress = address
-//                        locationSource = "manual"
-//                        tvSelectedLocation.text = "Selected location: $address"
-//                        saveSession(topic, date, time, zoomUrl)
-//                    },
-//                    onError = { message ->
-//                        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-//                    }
-//                )
-//                return@setOnClickListener
-//            }
-
             if (selectedLat == null || selectedLon == null) {
                 Toast.makeText(this, "Please select a location", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -171,6 +160,12 @@ class EditSessionActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Sends address to the API
+     * Receives lat/lon
+     *
+     * External API
+     */
     private fun searchManualLocation(
         etManualLocation: EditText,
         tvSelectedLocation: TextView
@@ -182,6 +177,7 @@ class EditSessionActivity : AppCompatActivity() {
             return
         }
 
+        //Geocoding API
         vm.searchLocationByQuery(
             query = manualLocation,
             onSuccess = { lat, lon, address ->
@@ -198,6 +194,10 @@ class EditSessionActivity : AppCompatActivity() {
         )
     }
 
+    /**
+     * Opens a date dialog
+     * Prevents past dates,
+     */
     private fun showDatePicker(etDate: EditText) {
         val calendar = Calendar.getInstance()
 
@@ -237,6 +237,9 @@ class EditSessionActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    /**
+     * Opens Time
+     */
     private fun showTimePicker(etTime: EditText) {
         val calendar = Calendar.getInstance()
 
@@ -259,6 +262,9 @@ class EditSessionActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    /**
+     * converts String → Date
+     */
     private fun isFutureOrToday(date: String): Boolean {
         return try {
             val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -286,6 +292,12 @@ class EditSessionActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Gets the user's current location using GPS (FusedLocationProviderClient),
+     * converts it to a readable address via API (reverse geocoding),
+     * and updates the UI.
+     * Handles permission checks and failure cases.
+     */
     private fun getCurrentLocation(tvSelectedLocation: TextView) {
         if (ContextCompat.checkSelfPermission(
                 this,
@@ -309,6 +321,7 @@ class EditSessionActivity : AppCompatActivity() {
                     selectedLon = location.longitude
                     locationSource = "current"
 
+                    //Reverse Geocoding API
                     vm.reverseGeocode(
                         lat = location.latitude,
                         lon = location.longitude,
@@ -361,6 +374,9 @@ class EditSessionActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * URL validation
+     */
     private fun isValidUrl(url: String): Boolean {
         return Patterns.WEB_URL.matcher(url).matches()
     }

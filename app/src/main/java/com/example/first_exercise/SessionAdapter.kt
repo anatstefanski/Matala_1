@@ -8,6 +8,14 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.first_exercise.model.StudySession
 
+/**
+ * RecyclerView Adapter for displaying course sessions.
+ *
+ * Handles:
+ * - Displaying session details
+ * - Register/unregister actions
+ * - Navigation to session location
+ */
 class SessionAdapter(
     private val courseId: String,
     private val isAdmin: Boolean,
@@ -19,6 +27,9 @@ class SessionAdapter(
     private var items = listOf<StudySession>()
     private var unreadCounts = mapOf<String, Int>()
 
+    /**
+     *Updates unread message badges for sessions
+     */
     fun updateUnreadCounts(newCounts: Map<String, Int>) {
         unreadCounts = newCounts
         notifyDataSetChanged()
@@ -43,20 +54,17 @@ class SessionAdapter(
 
     inner class SessionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         fun bind(session: StudySession,unreadCount: Int = 0) {
-            itemView.findViewById<TextView>(R.id.tvSessionTopic).text = session.topic
-            itemView.findViewById<TextView>(R.id.tvSessionDate).text = "${session.date} | ${session.time}"
+            itemView.findViewById<TextView>(R.id.tvSessionTopic).text = session.topic //name session
+            itemView.findViewById<TextView>(R.id.tvSessionDate).text = "${session.date} | ${session.time}" //date + time
 
             val cb = itemView.findViewById<CheckBox>(R.id.cbRegister)
             if (courseId.isEmpty()) {
                 cb.visibility = View.GONE
             }
 
-
+            //checked status
             cb.setOnCheckedChangeListener(null)
             cb.isChecked = session.isUserRegistered
-//            cb.setOnCheckedChangeListener { _, isChecked ->
-//                onRegClick(session, isChecked)
-//            }
             if (isAdmin) {
                 cb.isEnabled = false
                 cb.alpha = 0.5f
@@ -64,12 +72,14 @@ class SessionAdapter(
                 cb.isEnabled = true
                 cb.alpha = 1f
             }
+            // Handles register/unregister click
             cb.setOnCheckedChangeListener { _, isChecked ->
                 if (!isAdmin) {
                     onRegClick(session, isChecked)
                 }
             }
 
+            // Opens navigation if location exists
             val tvLocation = itemView.findViewById<TextView>(R.id.tvLocation)
             if (session.latitude == 0.0 && session.longitude == 0.0) {
                 tvLocation.text = "No location available"

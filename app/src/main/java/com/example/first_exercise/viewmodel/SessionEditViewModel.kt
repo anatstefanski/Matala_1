@@ -4,6 +4,11 @@ import androidx.lifecycle.ViewModel
 import com.example.first_exercise.model.StudySession
 import com.example.first_exercise.repository.SessionRepository
 
+/**
+ * ViewModel that connects the UI with data operations.
+ * Handles communication with external APIs (Geocoding & Reverse Geocoding)
+ * and Firebase through the Repository layer.
+ */
 class SessionEditViewModel : ViewModel() {
 
     private val repo = SessionRepository()

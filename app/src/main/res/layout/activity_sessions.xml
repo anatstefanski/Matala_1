@@ -10,7 +10,7 @@
         android:id="@+id/catalog_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="All Course Session"
+        android:text="All Course Sessions"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/black"
@@ -50,7 +50,7 @@
         android:textColor="@color/black"
         android:textStyle="bold"
         android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvCourseHeader"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>

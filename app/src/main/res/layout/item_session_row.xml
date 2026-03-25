@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textColor="#444444"
+            android:textColor="@color/Dark_Gray"
             android:textSize="14sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvSessionTopic" />
@@ -42,7 +42,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="📍Navigation to the session"
-            android:textColor="#1A73E8"
+            android:textColor="@color/blue"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvSessionDate" />
@@ -51,11 +51,12 @@
             android:id="@+id/cbRegister"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:buttonTint="#1A73E8"
+            android:buttonTint="@color/black"
             android:text="registration"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvLocation" />
+            app:layout_constraintTop_toBottomOf="@id/tvLocation"
+            />
 
         <TextView
             android:id="@+id/tvSessionBadge"

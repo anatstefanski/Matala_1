@@ -13,21 +13,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.first_exercise.viewmodel.SessionViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import android.widget.Toast
-import com.android.volley.Request
-import com.android.volley.toolbox.JsonArrayRequest
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
-import com.example.first_exercise.App
-import java.net.URLEncoder
 
+/**
+ * Displays all sessions of a selected course.
+ * Allows students to register and admins to create sessions.
+ */
 class SessionsActivity : AppCompatActivity() {
 
     private val vm: SessionViewModel by viewModels()
-
     private lateinit var adapter: SessionAdapter
     private lateinit var progressBar: ProgressBar
     private lateinit var emptyText: TextView
-
     private var courseId: String = ""
     private var courseName: String = ""
     private var isAdmin: Boolean = false
@@ -38,18 +34,26 @@ class SessionsActivity : AppCompatActivity() {
 
         isAdmin = intent.getBooleanExtra("IS_ADMIN", false)
         courseId = intent.getStringExtra("COURSE_ID") ?: ""
+        if (courseId.isEmpty()) {
+            Toast.makeText(this, "Error loading course", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
         courseName = intent.getStringExtra("COURSE_NAME") ?: ""
 
-        findViewById<TextView>(R.id.tvCourseHeader).text = courseName
+        val tvHeader = findViewById<TextView>(R.id.tvCourseHeader)
+        tvHeader.text = courseName
         progressBar = findViewById(R.id.progressBarSessions)
         emptyText = findViewById(R.id.tvEmptySessions)
 
         adapter = SessionAdapter(
             courseId,
             isAdmin,
+            // Handles register/unregister click from user
             onRegClick = { session, isChecked ->
                 vm.toggleRegistration(session, isChecked, courseId, isAdmin)
             },
+            // Opens navigation if location exists
             onLocClick = { session ->
                 if (session.latitude == 0.0 && session.longitude == 0.0) {
                     Toast.makeText(this, "No location available", Toast.LENGTH_SHORT).show()
@@ -57,7 +61,7 @@ class SessionsActivity : AppCompatActivity() {
                     openMaps(session.latitude, session.longitude)
                 }
             },
-            onSessionClick = { } // כאן לא צריך לעשות כלום
+            onSessionClick = { }
         )
 
         setupUI()
@@ -66,14 +70,22 @@ class SessionsActivity : AppCompatActivity() {
 
             adapter.submitList(list)
 
+            //no sessions
             if (list.isEmpty()) {
                 emptyText.visibility = View.VISIBLE
             } else {
                 emptyText.visibility = View.GONE
             }
         }
+
+        vm.errorMessage.observe(this) { message ->
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        }
     }
 
+    /**
+     * Setup RecyclerView with adapter
+     */
     private fun setupUI() {
 
         val rv = findViewById<RecyclerView>(R.id.rvSessions)
@@ -84,6 +96,7 @@ class SessionsActivity : AppCompatActivity() {
 
         fabAddSession.visibility = if (isAdmin) View.VISIBLE else View.GONE
 
+        // Navigate to create new session screen
         fabAddSession.setOnClickListener {
 
             val intent = Intent(this, EditSessionActivity::class.java).apply {
@@ -103,10 +116,15 @@ class SessionsActivity : AppCompatActivity() {
         }
     }
 
+    // Opens Google Maps navigation if available
     private fun openMaps(lat: Double, lon: Double) {
         val uri = Uri.parse("google.navigation:q=$lat,$lon")
         val intent = Intent(Intent.ACTION_VIEW, uri)
         intent.setPackage("com.google.android.apps.maps")
-        startActivity(intent)
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        } else {
+            Toast.makeText(this, "No maps app found", Toast.LENGTH_SHORT).show()
+        }
     }
 }
