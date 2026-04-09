@@ -45,16 +45,35 @@ Students can log into their account using email and password.
 Students can view all available courses and search or filter them.
 
 #### Course Details
-![Course](images/course.png)  
-Students can view course information and available study sessions.
+
+<p align="center">
+  <img src="images/sessions_student.jpg" width="45%" />
+  <img src="images/student_course_no.jpg" width="45%" />
+</p>  
+
+**When sessions are available:**  
+Students can view the available study sessions they can register for.
+
+**When no sessions are available:**  
+A message is displayed indicating that there are currently no study sessions available for this course.
 
 #### Session Registration
 ![Session](images/student_course_yes.jpg)  
 Students can register for available study sessions.
 
 #### My Sessions
-![Stats](images/stats.png)  
-Students can view their registered sessions along with statistics by category.
+
+<p align="center">
+  <img src="images/my_sessions_yes.jpg" width="45%" />
+  <img src="images/my_sessions_no.jpg" width="45%" />
+</p>    
+
+**When the student is registered to sessions:**  
+Students can view all the study sessions they have registered for.  
+In addition, a visual chart is displayed showing the distribution of their sessions by category (in percentages), along with a breakdown of how many sessions belong to each category.
+
+**When the student is not registered to any sessions:**  
+No sessions are displayed and the statistics chart remains empty.
 
 #### Chat
 ![Chat](images/chat.jpg)  
@@ -62,7 +81,7 @@ Students can communicate with other participants in the session.
 
 #### Profile
 ![Profile](images/edit_profile.jpg)  
-Students can edit their personal information.
+Students can edit their personal information and log out of their account.
 
 ---
 
