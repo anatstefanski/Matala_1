@@ -85,15 +85,15 @@ class EditSessionActivity : AppCompatActivity() {
             }
             false
         }
-//
-//        etManualLocation.setOnEditorActionListener { _, actionId, _ ->
-//            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-//                searchManualLocation(etManualLocation, tvSelectedLocation)
-//                true
-//            } else {
-//                false
-//            }
-//        }
+
+        etManualLocation.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                searchManualLocation(etManualLocation, tvSelectedLocation)
+                true
+            } else {
+                false
+            }
+        }
 
         etManualLocation.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}

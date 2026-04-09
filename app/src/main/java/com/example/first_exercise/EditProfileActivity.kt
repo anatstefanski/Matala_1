@@ -103,7 +103,16 @@ class EditProfileActivity : AppCompatActivity() {
                 // Name updated successfully → return to main screen
                 "NAME_CHANGED" -> {
                     Toast.makeText(this, "Profile updated successfully!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this, MainActivity::class.java))
+                    //startActivity(Intent(this, MainActivity::class.java))
+                    val intent = Intent(this, MainActivity::class.java)
+
+                    val isAdmin = viewModel.user.value?.admin == true
+                    val userId = viewModel.user.value?.uid ?: ""
+
+                    intent.putExtra("IS_ADMIN", isAdmin)
+                    intent.putExtra("USER_ID", userId)
+
+                    startActivity(intent)
                     finish()
                 }
 
