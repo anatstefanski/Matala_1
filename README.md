@@ -43,6 +43,8 @@ Administrators can create and manage courses and sessions.
 - Location services using Google Maps API (GPS integration)
 - Integration with external services (Maps API for location handling)
 - Real-time chat between users using Firebase
+- Error handling and user feedback for edge cases (invalid input, network issues)
+- Clean and maintainable code following best practices (MVVM, modular structure)
 
 ## Screenshots
 
