@@ -94,27 +94,25 @@ No sessions are displayed and the statistics chart remains empty.
 ![Chat](images/chat.jpg)  
 The student can communicate with other participants in the session.
 
-#### Profile
-![Profile](images/edit_profile.jpg)  
-The student can edit their personal information and log out of their account.
-
 ---
 
 ### Admin Flow
 
-#### Add Course
-![Add Course](images/add_course.png)  
-Admins can create new courses.
+#### Home 
+<p align="center">
+  <img src="images/main_admin.jpg" width="45%" />
+  <img src="images/add_new_course.jpg" width="45%" />
+  <img src="images/filter.jpg" width="45%" />
+  <img src="images/search.jpg" width="45%" />
+</p>   
+The admin can view all available courses, search or filter them, and add new courses.
 
 #### Add Session
-![Add Session](images/add_session.png)  
+<p align="center">
+  <img src="images/admin_course.jpg" width="45%" />
+  <img src="images/add_new_session.jpg" width="45%" />
+</p>   
 Admins can create new study sessions inside a course.
-
-#### Course Management
-![Course](images/course.png)  
-Admins can manage course sessions and content.
-
-
 
 
 ## Architecture
