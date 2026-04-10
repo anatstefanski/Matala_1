@@ -24,7 +24,7 @@ Administrators can create and manage courses and sessions.
 - View available courses
 - Create new courses
 - Create new study sessions
-- No registration to sessions 
+- Cannot register to sessions 
 - Search and filter courses
 - Edit profile
 
@@ -109,11 +109,21 @@ The admin can view all available courses, search or filter them, and add new cou
 
 #### Add Session
 <p align="center">
-  <img src="images/admin_course.jpg" width="45%" />
+  <img src="images/admin_course_no.jpg" width="45%" />
   <img src="images/add_new_session.jpg" width="45%" />
+  <img src="images/admin_course_yes.jpg" width="45%" />
 </p>   
-Admins can create new study sessions inside a course.
+Admins can create new study sessions inside a course.  
+Admins cannot register to sessions they create.
 
+## Tech Stack
+
+- Kotlin (Android)
+- MVVM Architecture
+- Firebase Authentication
+- Firebase Firestore
+- Google Maps & Location API
+- Postimage (image hosting)
 
 ## Architecture
 
@@ -124,3 +134,12 @@ The application is built using the MVVM architecture:
 - Repository (Firebase data handling)
 
 This structure ensures clean code, scalability, and maintainability.
+
+## Setup
+
+Open the project in Android Studio, connect Firebase (google-services.json), and run the app.
+
+## Author
+  
+Tifert Gamliel
+Anat Stefanski  
