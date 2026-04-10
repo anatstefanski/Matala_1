@@ -24,10 +24,24 @@ Administrators can create and manage courses and sessions.
 - View available courses
 - Create new courses
 - Create new study sessions
-- Cannot register to sessions 
+- Cannot register for sessions 
 - Search and filter courses
 - Edit profile
 
+## Key Features Implemented
+
+- User authentication using Firebase Authentication (login, registration, password reset)
+- Role-based access control (Admin and Student)
+- User profile management (CRUD operations)
+- Data management using Firebase Firestore
+- Image storage using Postimage
+- Pagination for efficient course display
+- Search and filtering of courses
+- Data visualization using charts (MPAndroidChart)
+- Aggregated statistics of sessions by category
+- Location services using Google Maps API (GPS integration)
+- Integration with external services (Maps API for location handling)
+- Real-time chat between users using Firebase
 
 ## Screenshots
 
@@ -114,7 +128,7 @@ The admin can view all available courses, search or filter them, and add new cou
   <img src="images/admin_course_yes.jpg" width="45%" />
 </p>   
 Admins can create new study sessions inside a course.  
-Admins cannot register to sessions they create.
+Admins cannot register for sessions they create.
 
 ## Tech Stack
 
@@ -139,7 +153,7 @@ This structure ensures clean code, scalability, and maintainability.
 
 Open the project in Android Studio, connect Firebase (google-services.json), and run the app.
 
-## Author
+## Authors
   
 Tifert Gamliel
 Anat Stefanski  
