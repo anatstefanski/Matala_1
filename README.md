@@ -32,18 +32,32 @@ Administrators can create and manage courses and sessions.
 ## Screenshots
 
 ---
-
-### Student Flow
+### Shared Screens (Student & Admin)
 
 #### Login
 ![Login](images/login.jpg)  
-The student can log into their account using email and password.
+The user can log into their account using email and password.
+
+#### Register
+![Register](images/register.jpg)  
+The user can create a new account.
+
+#### Forgot Password
+![Forgot Password](images/forgot_password.jpg)  
+The user can request a password reset via email.
+
+#### Profile
+![Profile](images/edit_profile.jpg)  
+The user can edit their personal information and log out of their account.
+
+
+### Student Flow
 
 #### Home 
 <p align="center">
   <img src="images/main_student.jpg" width="45%" />
-  <img src="images/filter.jpg" width="45%" />
-  <img src="images/search.jpg" width="45%" />
+  <img src="images/filter_s.jpg" width="45%" />
+  <img src="images/search_s.jpg" width="45%" />
 </p>   
 The student can view all available courses and search or filter them.
 
