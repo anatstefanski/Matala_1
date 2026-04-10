@@ -155,5 +155,5 @@ Open the project in Android Studio, connect Firebase (google-services.json), and
 
 ## Authors
   
-Tifert Gamliel
+Tifert Gamliel, 
 Anat Stefanski  
