@@ -94,7 +94,7 @@ The student can register for available study sessions.
 #### My Sessions
 <p align="center">
   <img src="images/my_sessions_yes.jpg" width="45%" />
-  <img src="images/my_sessions_no.jpg" width="45%" />
+  <img src="images/sessions_s_no.jpg" width="45%" />
 </p>    
 
 **When the student is registered to sessions:**  
@@ -102,7 +102,7 @@ The student can view all the study sessions they have registered for.
 In addition, a visual chart is displayed showing the distribution of their sessions by category (in percentages), along with a breakdown of how many sessions belong to each category.
 
 **When the student is not registered to any sessions:**  
-No sessions are displayed and the statistics chart remains empty.
+No sessions are displayed, the statistics chart remains empty, and a corresponding message is shown.
 
 #### Chat
 ![Chat](images/chat.jpg)  
