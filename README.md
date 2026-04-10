@@ -33,6 +33,7 @@ Administrators can create and manage courses and sessions.
 - User authentication using Firebase Authentication (login, registration, password reset)
 - Role-based access control (Admin and Student)
 - User profile management (CRUD operations)
+- Secure session management using Firebase Authentication (token-based authentication)
 - Data management using Firebase Firestore
 - Image storage using Postimage
 - Pagination for efficient course display
